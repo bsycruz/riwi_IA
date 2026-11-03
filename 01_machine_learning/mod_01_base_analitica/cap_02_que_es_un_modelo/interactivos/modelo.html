@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Le gustará esta camisa?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Martian+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --bg: #F9FAFC;
+  --surface: #FFFFFF;
+  --surface-2: #EFEDFF;
+  --ink: #181E4B;
+  --ink-soft: #5B6280;
+  --line: #DCDBF0;
+  --pizarra: #6B5CFF;
+  --pizarra-ink: #FFFFFF;
+  --si: #2E9C78;
+  --no: #D9503B;
+  --banda: #181E4B;
+  --banda-ink: #FFFFFF;
+  --banda-soft: #C3C6E6;
+  --logo-letras: #FFFFFF;
+  --f-display: "Ubuntu", "Trebuchet MS", system-ui, sans-serif;
+  --f-body: "Ubuntu", "Trebuchet MS", system-ui, sans-serif;
+  --f-data: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1230; --surface: #181E4B; --surface-2: #242B62; --ink: #EEF0FA; --ink-soft: #A9AECB; --line: #2F376E;
+    --pizarra: #8A7DFF; --pizarra-ink: #FFFFFF; --si: #5ACCA4; --no: #FE7B68;
+    --banda: #232A62; --banda-ink: #FFFFFF; --banda-soft: #C3C6E6; --logo-letras: #FFFFFF; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1230; --surface: #181E4B; --surface-2: #242B62; --ink: #EEF0FA; --ink-soft: #A9AECB; --line: #2F376E;
+  --pizarra: #8A7DFF; --pizarra-ink: #FFFFFF; --si: #5ACCA4; --no: #FE7B68;
+  --banda: #232A62; --banda-ink: #FFFFFF; --banda-soft: #C3C6E6; --logo-letras: #FFFFFF; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 400; }
+p { margin: 0; }
+
+header { display: flex; flex-direction: column; gap: 14px; background: var(--banda); color: var(--banda-ink); border-radius: 14px; padding: 22px 26px 26px; position: relative; overflow: hidden; }
+header::after { content: ""; position: absolute; right: -60px; top: -60px; width: 240px; height: 240px; border-radius: 50%; background: var(--pizarra); opacity: .22; pointer-events: none; }
+.marca-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; position: relative; }
+.marca-bar svg { height: 34px; width: auto; display: block; }
+.marca-bar span { font-family: var(--f-data); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--banda-soft); }
+header h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.05; position: relative; }
+header p { font-size: 1.12rem; color: var(--banda-soft); max-width: 60ch; position: relative; }
+header p strong { color: var(--banda-ink); }
+header h1 em { font-style: normal; color: #A89FFF; }
+
+.flujo { display: grid; grid-template-columns: minmax(0, 1.05fr) 64px minmax(0, 1fr) 64px minmax(0, 1fr); align-items: stretch; }
+.estacion { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.estacion.modelo { border: 2px solid var(--pizarra); }
+.est-head { display: flex; flex-direction: column; gap: 6px; }
+.titulo-paso { display: flex; align-items: center; gap: 12px; }
+.numero { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--pizarra); color: var(--pizarra-ink); font: 700 1.05rem var(--f-body); display: grid; place-items: center; }
+.est-head p { padding-left: 48px; }
+.pie-paso { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.paso { font-family: var(--f-data); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--pizarra); font-weight: 600; }
+.est-head h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+.est-head p { font-size: .95rem; color: var(--ink-soft); }
+.flecha { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--pizarra); }
+.flecha span { font-family: var(--f-data); font-size: .6rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+.flecha svg { width: 34px; height: 18px; }
+.pista { font-size: .85rem; color: var(--ink-soft); }
+
+.camisas { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; }
+.cam { position: relative; border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 6px 4px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: opacity .25s, transform .2s; font: inherit; color: inherit; }
+.cam:hover { transform: translateY(-2px); }
+.cam svg { width: 100%; max-width: 50px; height: auto; display: block; }
+.cam small { font-family: var(--f-data); font-size: .64rem; color: var(--ink-soft); }
+.cam .marca { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; color: #fff; font: 700 13px var(--f-body); display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface); }
+.cam .marca.si { background: var(--si); }
+.cam .marca.no { background: var(--no); }
+.cam.fuera { opacity: .2; }
+.cam.nueva { animation: pulso .5s ease; }
+@keyframes pulso { 0% { transform: scale(1.18); box-shadow: 0 0 0 3px var(--pizarra); } 100% { transform: scale(1); } }
+.botones { display: flex; flex-wrap: wrap; gap: 8px; }
+button.btn { font: 600 .95rem var(--f-body); padding: 9px 15px; border-radius: 5px; cursor: pointer; border: 1px solid var(--pizarra); background: transparent; color: var(--pizarra); transition: background .15s, color .15s; }
+button.btn.primario { background: var(--pizarra); color: var(--pizarra-ink); }
+button.btn:hover:not(:disabled) { background: var(--pizarra); color: var(--pizarra-ink); }
+button.btn:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid var(--pizarra); outline-offset: 2px; }
+
+.grupo h3 { font-size: .74rem; font-family: var(--f-data); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 4px; }
+.fila { display: grid; grid-template-columns: 72px minmax(0, 1fr) 86px; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 4px; font-size: .92rem; transition: background .2s; }
+.fila.usa { background: var(--surface-2); font-weight: 700; box-shadow: inset 3px 0 0 var(--pizarra); }
+.fila .bar { height: 10px; background: var(--surface-2); border-radius: 3px; position: relative; overflow: hidden; }
+.fila.usa .bar { background: var(--bg); }
+.fila .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 3px; transition: width .35s ease, background .35s; }
+.fila .val { font-family: var(--f-data); font-size: .76rem; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fila .val b { font-size: .9rem; }
+.acierta { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; gap: 2px; }
+.acierta .num { font-family: var(--f-data); font-weight: 600; font-size: 1.6rem; font-variant-numeric: tabular-nums; color: var(--pizarra); }
+.etq-mini { font-family: var(--f-data); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+.acierta span { font-size: .9rem; color: var(--ink-soft); }
+
+.camisa-grande { background: var(--surface-2); border-radius: 8px; display: flex; justify-content: center; padding: 8px; }
+.camisa-grande svg { width: 100%; max-width: 150px; height: auto; }
+.opciones { display: flex; flex-direction: column; gap: 10px; }
+.opcion { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.opcion > span { font-size: .8rem; width: 56px; color: var(--ink-soft); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { font: 600 .9rem var(--f-body); padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.chips button i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.3); display: inline-block; }
+.resultado { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.formula { display: flex; flex-direction: column; gap: 6px; }
+.f-ops { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-family: var(--f-data); font-size: .85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.f-ops .t { background: var(--surface-2); color: var(--ink); font-weight: 600; padding: 3px 8px; border-radius: 5px; }
+.f-ops .t.res { background: var(--pizarra); color: var(--pizarra-ink); }
+.grande { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.grande .num { font-family: var(--f-data); font-weight: 600; font-size: 3rem; line-height: 1; font-variant-numeric: tabular-nums; transition: color .3s; }
+.grande .txt { font-family: var(--f-display); font-weight: 500; font-size: 1.3rem; }
+.medidor { height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--no), var(--surface-2) 50%, var(--si)); position: relative; }
+.medidor i { position: absolute; top: -5px; width: 4px; height: 24px; background: var(--ink); border-radius: 2px; transform: translateX(-2px); transition: left .45s cubic-bezier(.3,1.4,.5,1); }
+.medidor-lbl { display: flex; justify-content: space-between; font-size: .75rem; color: var(--ink-soft); }
+
+.claves { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-block: 1px solid var(--line); }
+.claves div { padding: 14px 16px 14px 0; display: flex; flex-direction: column; gap: 2px; }
+.claves div + div { border-left: 1px solid var(--line); padding-left: 16px; }
+.claves b { font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; color: var(--pizarra); }
+.claves span { font-size: .9rem; color: var(--ink-soft); }
+
+
+.historia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 28px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 24px; }
+.escena { align-self: center; background: var(--surface-2); border-radius: 12px; display: flex; align-items: flex-end; justify-content: center; padding: 10px 10px 0; overflow: hidden; }
+.escena svg { width: 100%; max-width: 440px; height: auto; display: block; }
+.relato { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.relato .paso { color: var(--pizarra); }
+.relato h2 { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.5rem, 3.2vw, 2.15rem); line-height: 1.15; }
+.relato > p { color: var(--ink-soft); font-size: 1rem; max-width: 52ch; }
+.opciones-jefa { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.idea { position: relative; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 10px 10px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font: inherit; color: inherit; text-align: center; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.idea:hover { transform: translateY(-2px); border-color: var(--pizarra); }
+.idea .letra { position: absolute; top: 8px; left: 10px; font-weight: 700; color: var(--pizarra); font-size: .9rem; }
+.idea svg { width: 64px; height: auto; }
+.idea b { font-size: .9rem; }
+.idea small { font-size: .78rem; color: var(--ink-soft); line-height: 1.3; }
+.idea .pron { font-family: var(--f-data); font-weight: 600; font-size: 1.35rem; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.idea .pron.oculto { color: var(--ink-soft); opacity: .6; }
+.idea .mini-bar { width: 100%; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.idea .mini-bar i { display: block; height: 100%; transition: width .5s ease; }
+.idea.mejor { border: 2px solid var(--pizarra); box-shadow: 0 6px 18px -8px var(--pizarra); }
+.idea .sello { position: absolute; top: -10px; right: -6px; background: var(--pizarra); color: var(--pizarra-ink); font-size: .68rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+.decision { font-size: 1rem; background: var(--surface-2); border-radius: 8px; padding: 10px 14px; }
+.decision b { color: var(--pizarra); }
+@media (max-width: 860px) {
+  .historia { grid-template-columns: minmax(0, 1fr); }
+  .escena { max-width: 460px; margin: 0 auto; width: 100%; }
+}
+@media (max-width: 440px) {
+  .opciones-jefa { gap: 6px; }
+  .idea { padding: 8px 4px 10px; }
+  .idea svg { width: 48px; }
+  .idea small { display: none; }
+}
+
+.etiquetado { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 24px; align-items: stretch; }
+.et-izq { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.et-izq h2 { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.35rem, 2.6vw, 1.75rem); line-height: 1.2; }
+.et-izq h2 em { font-style: normal; color: var(--pizarra); }
+.anatomia { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.anat-camisa { width: 84px; flex: none; background: var(--surface-2); border-radius: 10px; padding: 8px; position: relative; }
+.anat-camisa svg { width: 100%; height: auto; display: block; }
+.anat-fila { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; flex: 1; }
+.anat-x, .anat-y { display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; border: 2px solid; }
+.anat-x { border-color: var(--pizarra); }
+.anat-y { border-color: var(--si); }
+.anat-x .cab, .anat-y .cab { font-family: var(--f-data); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; padding: 5px 10px; color: #fff; }
+.anat-x .cab { background: var(--pizarra); }
+.anat-y .cab { background: var(--si); }
+.celdas { display: flex; }
+.celda { display: flex; flex-direction: column; padding: 6px 12px 8px; min-width: 72px; }
+.celda + .celda { border-left: 1px solid var(--line); }
+.celda small { font-size: .72rem; color: var(--ink-soft); }
+.celda b { font-size: 1rem; }
+.celda b.si { color: var(--si); }
+.celda b.no { color: var(--no); }
+.celda b.q { color: var(--ink-soft); }
+.et-der { background: var(--surface-2); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+.et-der h3 { font-weight: 700; font-size: 1.1rem; }
+.switch { display: inline-flex; align-items: center; gap: 12px; background: transparent; border: 0; padding: 0; cursor: pointer; font: 600 .95rem var(--f-body); color: var(--ink); text-align: left; }
+.switch .pista-sw { width: 50px; height: 28px; border-radius: 14px; background: var(--si); position: relative; transition: background .2s; flex: none; }
+.switch .pista-sw::after { content: ""; position: absolute; top: 3px; left: 25px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.switch[aria-checked="false"] .pista-sw { background: var(--ink-soft); }
+.switch[aria-checked="false"] .pista-sw::after { left: 3px; }
+.et-estado { font-size: .95rem; }
+.et-estado b.si { color: var(--si); }
+.et-estado b.no { color: var(--no); }
+.cam .marca.q { background: var(--ink-soft); }
+@media (max-width: 860px) { .etiquetado { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .etiquetado { padding: 16px; } .celda { min-width: 0; padding: 6px 9px 8px; } }
+@media (max-width: 1000px) {
+  .flujo { grid-template-columns: minmax(0, 1fr); }
+  .flecha { padding: 6px 0; flex-direction: row; gap: 8px; }
+  .flecha svg { transform: rotate(90deg); }
+  .claves { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .claves div:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .claves div:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 520px) {
+  .estacion { padding: 14px; }
+  .est-head p { padding-left: 0; }
+  .escena { min-height: 0; }
+  .claves { grid-template-columns: minmax(0, 1fr); }
+  .claves div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+  .fila { grid-template-columns: 64px minmax(0, 1fr) 80px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.etq { font-family: var(--f-data); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+.firma { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+.firma-autor { display: flex; align-items: center; gap: 14px; }
+.firma-ini { width: 48px; height: 48px; border-radius: 50%; background: var(--pizarra); color: var(--pizarra-ink); display: grid; place-items: center; font-weight: 700; font-size: 1.05rem; flex: none; }
+.firma-autor div { display: flex; flex-direction: column; gap: 1px; }
+.firma-autor b { font-size: 1.15rem; }
+.firma-autor div > span:last-child { font-size: .9rem; color: var(--ink-soft); }
+.firma-marca { display: flex; align-items: center; gap: 12px; }
+.firma-marca svg { height: 26px; width: auto; }
+.firma-marca span { font-size: .82rem; color: var(--ink-soft); }
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <div class="marca-bar"><svg viewBox="0 0 246.192 70.793" role="img" aria-label="Riwi"><g>
+<path fill="#6b5cff" transform="translate(-220.45 -21.27)" d="M465.319,56.584a11.032,11.032,0,0,0-4.333-3.681L441.006,42.878c-1.873-.9-3.034-1.043-3.878-.508s-1.224,1.677-1.224,3.7v1.289a7.583,7.583,0,0,0,.893,4.051,7.556,7.556,0,0,0,3.268,2.577l15.907,7.738c.068.031.125.06.174.088-.055.031-.12.063-.2.1l-15.879,7.724a7.574,7.574,0,0,0-3.271,2.579,7.586,7.586,0,0,0-.894,4.052v1.288c0,2.027.377,3.17,1.223,3.7a2.083,2.083,0,0,0,1.147.314,6.73,6.73,0,0,0,2.757-.831l19.985-10.029a10.944,10.944,0,0,0,4.3-3.666,9.719,9.719,0,0,0,1.323-5.234,9.718,9.718,0,0,0-1.323-5.234"/>
+<path fill="#6b5cff" transform="translate(-37.296)" d="M106.123,1.075C105.586.361,104.226,0,102.082,0h-1.735a7.949,7.949,0,0,0-4.625,1.048,8.463,8.463,0,0,0-2.45,4.157L74.333,65.5c-.693,2.08-.773,3.5-.234,4.214s1.9,1.076,4.04,1.076h1.429a7.949,7.949,0,0,0,4.625-1.048,8.417,8.417,0,0,0,2.451-4.056l19.244-60.5c.692-2.014.773-3.4.236-4.116"/>
+<path fill="#6b5cff" transform="translate(0 -21.272)" d="M29.516,42.375c-.858-.543-2.024-.388-3.9.518L5.628,52.922a10.937,10.937,0,0,0-4.3,3.666A9.717,9.717,0,0,0,0,61.822a9.723,9.723,0,0,0,1.323,5.234,11.029,11.029,0,0,0,4.333,3.68L25.637,80.763a6.6,6.6,0,0,0,2.728.816,2.111,2.111,0,0,0,1.15-.309c.847-.533,1.224-1.677,1.224-3.7V76.276a7.575,7.575,0,0,0-.893-4.05,7.546,7.546,0,0,0-3.268-2.577L10.671,61.911c-.068-.032-.125-.061-.174-.088.055-.03.12-.064.2-.1L26.574,54a7.579,7.579,0,0,0,3.271-2.578,7.587,7.587,0,0,0,.894-4.053V46.079c0-2.027-.377-3.17-1.223-3.7"/>
+<g style="fill:var(--logo-letras)">
+<path transform="translate(-108.93 -17.961)" d="M222.632,35.515H220.8c-2.216,0-3.688.349-4.376,1.036s-1.037,2.161-1.037,4.376V80.322c0,2.217.349,3.689,1.036,4.375s2.159,1.038,4.377,1.038h1.827c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-197.176 -17.961)" d="M397.125,35.515H395.3c-2.215,0-3.688.349-4.376,1.036s-1.036,2.161-1.036,4.376V80.322c0,2.217.348,3.689,1.036,4.375s2.159,1.038,4.376,1.038h1.828c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-63.977 -3.538)" d="M148.672,47.043c8.9-2.275,13.349-8.8,13.349-19.48,0-13.745-7.318-20.568-21.854-20.568A1.749,1.749,0,0,0,138.5,8.209l-2.748,8.558a1.983,1.983,0,0,0,1.888,2.589h2.525c6.032,0,8.6,2.571,8.6,8.207,0,5.438-2.867,8.108-8.6,8.108h-8.378a2.884,2.884,0,0,0-2.746,2l-2.436,7.588a2.121,2.121,0,0,0,2.02,2.77h5.707L146.4,66.424c2.67,3.856,4.449,4.845,8.9,4.845h3.757c4.648,0,5.043-1.088,2.571-4.746Z"/>
+<path transform="translate(-130.426 -17.993)" d="M310.465,35.579H308.9a4.882,4.882,0,0,0-3.876,1.338c-.72.847-1.179,2.354-1.442,4.744l-2.7,28.532a8.3,8.3,0,0,1-.632,2.9.887.887,0,0,1-.815.357.922.922,0,0,1-.876-.388,7.838,7.838,0,0,1-.568-2.84l-2.278-24.49c-.353-3.7-1.216-6.249-2.637-7.795s-3.667-2.34-6.653-2.354v0h-.109v0c-2.986.014-5.226.805-6.653,2.354s-2.284,4.1-2.637,7.795l-2.278,24.49a7.838,7.838,0,0,1-.568,2.84.921.921,0,0,1-.876.388.887.887,0,0,1-.815-.357,8.3,8.3,0,0,1-.632-2.9l-2.7-28.532c-.263-2.39-.722-3.9-1.441-4.744a4.883,4.883,0,0,0-3.876-1.338h-1.565c-1.934,0-3.175.466-3.8,1.424-.573.886-.715,2.39-.45,4.733l3.13,30.072c.494,4.616,1.541,8.032,3.194,10.438,1.739,2.39,4.752,3.6,8.953,3.6,3.494,0,6.093-1.138,7.723-3.383,1.576-2.169,2.558-5.659,3-10.67l1.848-20.072h.985L288.709,71.8c.445,5.011,1.427,8.5,3,10.67,1.63,2.244,4.228,3.383,7.723,3.383,4.2,0,7.214-1.212,8.953-3.6,1.654-2.406,2.7-5.822,3.194-10.438l3.13-30.072c.266-2.343.123-3.847-.45-4.733-.622-.958-1.864-1.424-3.8-1.424"/>
+<path transform="translate(-197.763)" d="M400.581,0h-1.735a7.953,7.953,0,0,0-4.625,1.048,8.467,8.467,0,0,0-2.45,4.157l-.622,1.981a2.266,2.266,0,0,0,2.162,2.945h7.846a2.266,2.266,0,0,0,2.159-1.58l1.069-3.361c.693-2.014.773-3.4.236-4.116S402.725,0,400.581,0"/>
+</g></g></svg><span>Machine Learning · desde cero</span></div>
+    <h1>¿Qué es un <em>modelo</em>?</h1>
+    <p>Una tienda quiere saber si una camisa nueva va a gustar. Para eso mira sus <strong>ventas pasadas</strong> y saca conclusiones. Eso que aprende de los datos es el <strong>modelo</strong>.</p>
+  </header>
+
+  <section class="historia" aria-label="La pregunta de la jefa">
+    <div class="escena">
+      <svg viewBox="30 4 384 296" role="img" aria-label="Laura, la jefa de la tienda, piensa qué camisa sacar en diciembre">
+        <ellipse cx="318" cy="84" rx="96" ry="66" style="fill:var(--surface-2);stroke:var(--pizarra)" stroke-width="2"/>
+        <circle cx="214" cy="146" r="9" style="fill:var(--surface-2);stroke:var(--pizarra)" stroke-width="2"/>
+        <circle cx="196" cy="166" r="5.5" style="fill:var(--surface-2);stroke:var(--pizarra)" stroke-width="2"/>
+        <circle cx="184" cy="180" r="3" style="fill:var(--surface-2);stroke:var(--pizarra)" stroke-width="2"/>
+        <g id="nubeCamisas"></g>
+        <g transform="translate(330 196)">
+          <rect width="72" height="84" rx="8" style="fill:var(--surface);stroke:var(--line)" stroke-width="2"/>
+          <path d="M0 8a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8v16H0z" fill="#6B5CFF"/>
+          <text x="36" y="17" text-anchor="middle" style="font:700 11px var(--f-body);fill:#fff">2026</text>
+          <text x="36" y="60" text-anchor="middle" style="font:700 26px var(--f-body);fill:var(--ink)">DIC</text>
+          <circle cx="16" cy="0" r="3.5" style="fill:var(--ink)"/><circle cx="56" cy="0" r="3.5" style="fill:var(--ink)"/>
+        </g>
+        <path d="M40,300 Q44,222 126,210 Q208,222 214,300 Z" fill="#6B5CFF"/>
+        <path d="M106,212 L126,252 L146,212 Z" fill="#FFFFFF"/>
+        <path d="M98,214 L126,268 L112,214 Z M154,214 L126,268 L140,214 Z" fill="#5446D9"/>
+        <rect x="115" y="182" width="22" height="32" rx="6" fill="#B97E5B"/>
+        <ellipse cx="126" cy="156" rx="34" ry="38" fill="#C68B63"/>
+        <path d="M90,162 Q84,108 128,106 Q170,108 164,160 Q160,128 132,126 Q100,128 90,162 Z" fill="#2A2238"/>
+        <circle cx="128" cy="100" r="15" fill="#2A2238"/>
+        <path d="M104,146 Q112,141 120,145" fill="none" stroke="#2A2238" stroke-width="3" stroke-linecap="round"/>
+        <path d="M134,140 Q143,134 152,140" fill="none" stroke="#2A2238" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="114" cy="155" r="3.4" fill="#1C1828"/><circle cx="143" cy="153" r="3.4" fill="#1C1828"/>
+        <path d="M118,177 Q126,181 135,176" fill="none" stroke="#7A4A33" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M188,268 Q206,226 172,196" fill="none" stroke="#6B5CFF" stroke-width="22" stroke-linecap="round"/>
+        <circle cx="160" cy="186" r="11" fill="#C68B63"/>
+      </svg>
+    </div>
+    <div class="relato">
+      <span class="paso">La pregunta</span>
+      <h2>“¿Qué camisa nueva saco para diciembre?”</h2>
+      <p>Laura, jefa de la tienda, tiene tres ideas. Fabricar cuesta, así que antes de decidir busca respuestas en los datos de ventas.</p>
+      <div class="opciones-jefa" id="ideas"></div>
+      <div class="botones">
+        <button class="btn primario" id="revelar" type="button">Preguntarle al modelo</button>
+        <span class="pista" id="pistaIdeas" style="align-self:center">Antes de revelar: ¿cuál elegirían ustedes?</span>
+      </div>
+      <p class="decision" id="decision" hidden></p>
+    </div>
+  </section>
+
+
+  <section class="etiquetado" aria-label="Datos etiquetados">
+    <div class="et-izq">
+      <span class="paso">Antes de entrenar</span>
+      <h2>Cada camisa es un <em>dato etiquetado</em></h2>
+      <div class="anatomia">
+        <div class="anat-camisa" id="anatCamisa" aria-hidden="true"></div>
+        <div class="anat-fila">
+          <div class="anat-x"><span class="cab">Características · lo que vemos</span><div class="celdas" id="anatX"></div></div>
+          <div class="anat-y"><span class="cab">Etiqueta · la respuesta</span><div class="celdas" id="anatY"></div></div>
+        </div>
+      </div>
+      <p class="pista">Ojo: no es la etiqueta del precio. Es la respuesta correcta que la tienda ya conoce porque la camisa ya se vendió.</p>
+    </div>
+    <div class="et-der">
+      <h3>¿Y si quitamos las etiquetas?</h3>
+      <button class="switch" id="swEtiquetas" type="button" role="switch" aria-checked="true"><span class="pista-sw" aria-hidden="true"></span><span id="swTxt">Con etiquetas</span></button>
+      <p class="et-estado" id="etEstado"></p>
+    </div>
+  </section>
+  <div class="flujo">
+    <section class="estacion">
+      <div class="est-head">
+        <div class="titulo-paso"><span class="numero" aria-hidden="true">1</span><h2>Los datos</h2></div>
+        <p>Laura abre las 20 camisas que ya vendió, cada una con su etiqueta.</p>
+      </div>
+      <div class="camisas" id="camisas"></div>
+      <div class="pie-paso">
+        <p class="pista">Etiqueta: ✓ gustó · ✗ no gustó. Toca una camisa para cambiar su etiqueta.</p>
+        <div class="botones">
+          <button class="btn primario" id="entrenar" type="button">▶ Entrenar desde cero</button>
+          <button class="btn" id="restaurar" type="button">Restaurar datos</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="flecha" aria-hidden="true"><svg viewBox="0 0 34 18"><path d="M2 9H28M22 3L30 9L22 15" fill="none" stroke="currentColor" stroke-width="2.4"/></svg><span>aprende</span></div>
+
+    <section class="estacion modelo">
+      <div class="est-head">
+        <div class="titulo-paso"><span class="numero" aria-hidden="true">2</span><h2>El modelo</h2></div>
+        <p>Lo que aprendió contando: ¿qué % de cada tipo gustó?</p>
+      </div>
+      <div id="reglas" style="display:flex;flex-direction:column;gap:12px"></div>
+      <div class="acierta pie-paso"><span class="etq-mini">Prueba rápida</span><div><span class="num" id="acierta">0/20</span> <span>aciertos con las camisas que ya conoce</span></div></div>
+    </section>
+
+    <div class="flecha" aria-hidden="true"><svg viewBox="0 0 34 18"><path d="M2 9H28M22 3L30 9L22 15" fill="none" stroke="currentColor" stroke-width="2.4"/></svg><span>predice</span></div>
+
+    <section class="estacion" id="paso3">
+      <div class="est-head">
+        <div class="titulo-paso"><span class="numero" aria-hidden="true">3</span><h2>La predicción</h2></div>
+        <p>Arma una camisa para diciembre y pregúntale al modelo.</p>
+      </div>
+      <div class="camisa-grande" id="camisaGrande" aria-hidden="true"></div>
+      <div class="opciones">
+        <div class="opcion"><span>Color</span><div class="chips" id="optColor"></div></div>
+        <div class="opcion"><span>Manga</span><div class="chips" id="optManga"></div></div>
+        <div class="opcion"><span>Precio</span><div class="chips" id="optPrecio"></div></div>
+      </div>
+      <div class="resultado">
+        <div class="grande"><span class="num" id="pct">50%</span><span class="txt" id="veredicto"></span></div>
+        <div class="medidor" aria-hidden="true"><i id="aguja"></i></div>
+        <div class="medidor-lbl"><span>No gusta</span><span>Gusta</span></div>
+        <div class="formula" id="formula"></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="claves" aria-label="Palabras clave">
+    <div><b>Datos · experiencia</b><span>Los ejemplos del pasado: las 20 ventas.</span></div>
+    <div><b>Datos etiquetados</b><span>Ejemplos que ya traen la respuesta: ✓ o ✗.</span></div>
+    <div><b>Modelo</b><span>Lo que se aprende de los datos: los porcentajes.</span></div>
+    <div><b>Tarea</b><span>Lo que le pedimos: decir si una camisa gustará.</span></div>
+    <div><b>Probabilidad</b><span>Qué tan segura está la respuesta: el %.</span></div>
+  </section>
+
+  <footer class="firma">
+    <div class="firma-autor">
+      <span class="firma-ini" aria-hidden="true">BY</span>
+      <div><span class="etq">Autor</span><b>Bryan Yama Cruz</b><span>Ingeniero de Machine Learning e Inteligencia Artificial</span></div>
+    </div>
+    <div class="firma-marca"><svg viewBox="0 0 246.192 70.793" role="img" aria-label="Riwi"><g>
+<path fill="#6b5cff" transform="translate(-220.45 -21.27)" d="M465.319,56.584a11.032,11.032,0,0,0-4.333-3.681L441.006,42.878c-1.873-.9-3.034-1.043-3.878-.508s-1.224,1.677-1.224,3.7v1.289a7.583,7.583,0,0,0,.893,4.051,7.556,7.556,0,0,0,3.268,2.577l15.907,7.738c.068.031.125.06.174.088-.055.031-.12.063-.2.1l-15.879,7.724a7.574,7.574,0,0,0-3.271,2.579,7.586,7.586,0,0,0-.894,4.052v1.288c0,2.027.377,3.17,1.223,3.7a2.083,2.083,0,0,0,1.147.314,6.73,6.73,0,0,0,2.757-.831l19.985-10.029a10.944,10.944,0,0,0,4.3-3.666,9.719,9.719,0,0,0,1.323-5.234,9.718,9.718,0,0,0-1.323-5.234"/>
+<path fill="#6b5cff" transform="translate(-37.296)" d="M106.123,1.075C105.586.361,104.226,0,102.082,0h-1.735a7.949,7.949,0,0,0-4.625,1.048,8.463,8.463,0,0,0-2.45,4.157L74.333,65.5c-.693,2.08-.773,3.5-.234,4.214s1.9,1.076,4.04,1.076h1.429a7.949,7.949,0,0,0,4.625-1.048,8.417,8.417,0,0,0,2.451-4.056l19.244-60.5c.692-2.014.773-3.4.236-4.116"/>
+<path fill="#6b5cff" transform="translate(0 -21.272)" d="M29.516,42.375c-.858-.543-2.024-.388-3.9.518L5.628,52.922a10.937,10.937,0,0,0-4.3,3.666A9.717,9.717,0,0,0,0,61.822a9.723,9.723,0,0,0,1.323,5.234,11.029,11.029,0,0,0,4.333,3.68L25.637,80.763a6.6,6.6,0,0,0,2.728.816,2.111,2.111,0,0,0,1.15-.309c.847-.533,1.224-1.677,1.224-3.7V76.276a7.575,7.575,0,0,0-.893-4.05,7.546,7.546,0,0,0-3.268-2.577L10.671,61.911c-.068-.032-.125-.061-.174-.088.055-.03.12-.064.2-.1L26.574,54a7.579,7.579,0,0,0,3.271-2.578,7.587,7.587,0,0,0,.894-4.053V46.079c0-2.027-.377-3.17-1.223-3.7"/>
+<g style="fill:var(--ink)">
+<path transform="translate(-108.93 -17.961)" d="M222.632,35.515H220.8c-2.216,0-3.688.349-4.376,1.036s-1.037,2.161-1.037,4.376V80.322c0,2.217.349,3.689,1.036,4.375s2.159,1.038,4.377,1.038h1.827c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-197.176 -17.961)" d="M397.125,35.515H395.3c-2.215,0-3.688.349-4.376,1.036s-1.036,2.161-1.036,4.376V80.322c0,2.217.348,3.689,1.036,4.375s2.159,1.038,4.376,1.038h1.828c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-63.977 -3.538)" d="M148.672,47.043c8.9-2.275,13.349-8.8,13.349-19.48,0-13.745-7.318-20.568-21.854-20.568A1.749,1.749,0,0,0,138.5,8.209l-2.748,8.558a1.983,1.983,0,0,0,1.888,2.589h2.525c6.032,0,8.6,2.571,8.6,8.207,0,5.438-2.867,8.108-8.6,8.108h-8.378a2.884,2.884,0,0,0-2.746,2l-2.436,7.588a2.121,2.121,0,0,0,2.02,2.77h5.707L146.4,66.424c2.67,3.856,4.449,4.845,8.9,4.845h3.757c4.648,0,5.043-1.088,2.571-4.746Z"/>
+<path transform="translate(-130.426 -17.993)" d="M310.465,35.579H308.9a4.882,4.882,0,0,0-3.876,1.338c-.72.847-1.179,2.354-1.442,4.744l-2.7,28.532a8.3,8.3,0,0,1-.632,2.9.887.887,0,0,1-.815.357.922.922,0,0,1-.876-.388,7.838,7.838,0,0,1-.568-2.84l-2.278-24.49c-.353-3.7-1.216-6.249-2.637-7.795s-3.667-2.34-6.653-2.354v0h-.109v0c-2.986.014-5.226.805-6.653,2.354s-2.284,4.1-2.637,7.795l-2.278,24.49a7.838,7.838,0,0,1-.568,2.84.921.921,0,0,1-.876.388.887.887,0,0,1-.815-.357,8.3,8.3,0,0,1-.632-2.9l-2.7-28.532c-.263-2.39-.722-3.9-1.441-4.744a4.883,4.883,0,0,0-3.876-1.338h-1.565c-1.934,0-3.175.466-3.8,1.424-.573.886-.715,2.39-.45,4.733l3.13,30.072c.494,4.616,1.541,8.032,3.194,10.438,1.739,2.39,4.752,3.6,8.953,3.6,3.494,0,6.093-1.138,7.723-3.383,1.576-2.169,2.558-5.659,3-10.67l1.848-20.072h.985L288.709,71.8c.445,5.011,1.427,8.5,3,10.67,1.63,2.244,4.228,3.383,7.723,3.383,4.2,0,7.214-1.212,8.953-3.6,1.654-2.406,2.7-5.822,3.194-10.438l3.13-30.072c.266-2.343.123-3.847-.45-4.733-.622-.958-1.864-1.424-3.8-1.424"/>
+<path transform="translate(-197.763)" d="M400.581,0h-1.735a7.953,7.953,0,0,0-4.625,1.048,8.467,8.467,0,0,0-2.45,4.157l-.622,1.981a2.266,2.266,0,0,0,2.162,2.945h7.846a2.266,2.266,0,0,0,2.159-1.58l1.069-3.361c.693-2.014.773-3.4.236-4.116S402.725,0,400.581,0"/>
+</g></g></svg><span>Material de clase · datos de ejemplo</span></div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var COLORES = { azul: { n: "Azul", hex: "#2C3E5C", osc: true }, blanco: { n: "Blanco", hex: "#EEECE6", osc: false }, mostaza: { n: "Mostaza", hex: "#C29A35", osc: false } };
+  var MANGAS = { corta: "Corta", larga: "Larga" };
+  var PRECIOS = { barata: { n: "Barata", v: "$50k" }, cara: { n: "Cara", v: "$120k" } };
+  var GRUPOS = [
+    { k: "color", n: "Color", op: ["azul", "blanco", "mostaza"], nom: function (k) { return COLORES[k].n; } },
+    { k: "manga", n: "Manga", op: ["corta", "larga"], nom: function (k) { return MANGAS[k]; } },
+    { k: "precio", n: "Precio", op: ["barata", "cara"], nom: function (k) { return PRECIOS[k].n; } }
+  ];
+
+  var ORIGINAL = [
+    ["azul", "corta", "barata", 1], ["blanco", "corta", "barata", 1], ["mostaza", "larga", "cara", 0], ["azul", "corta", "cara", 1],
+    ["blanco", "larga", "cara", 0], ["mostaza", "corta", "barata", 1], ["azul", "larga", "barata", 1], ["blanco", "corta", "cara", 1],
+    ["mostaza", "corta", "cara", 0], ["azul", "larga", "cara", 0], ["blanco", "larga", "barata", 0], ["mostaza", "larga", "barata", 0],
+    ["azul", "corta", "barata", 1], ["blanco", "corta", "barata", 1], ["mostaza", "corta", "barata", 0], ["blanco", "larga", "cara", 0],
+    ["azul", "larga", "barata", 1], ["mostaza", "larga", "cara", 0], ["blanco", "corta", "cara", 1], ["mostaza", "corta", "cara", 0]
+  ];
+  var datos, usadas, nueva = -1, etiquetas = true;
+  function restaurar() { datos = ORIGINAL.map(function (r) { return { color: r[0], manga: r[1], precio: r[2], gusto: r[3] }; }); usadas = datos.length; }
+  restaurar();
+  var nueva_ = { color: "azul", manga: "corta", precio: "barata" };
+
+  function entrenar() {
+    var m = {};
+    GRUPOS.forEach(function (g) { g.op.forEach(function (o) { m[g.k + ":" + o] = { si: 0, total: 0 }; }); });
+    if (!etiquetas) return m;
+    datos.slice(0, usadas).forEach(function (c) {
+      GRUPOS.forEach(function (g) { var r = m[g.k + ":" + c[g.k]]; r.total++; r.si += c.gusto; });
+    });
+    return m;
+  }
+  function predecir(m, c) {
+    var partes = [];
+    GRUPOS.forEach(function (g) { var r = m[g.k + ":" + c[g.k]]; if (r.total) partes.push(r.si / r.total); });
+    var p = partes.length ? partes.reduce(function (a, b) { return a + b; }, 0) / partes.length : .5;
+    return { p: p, partes: partes };
+  }
+
+  function camisa(c, conPrecio) {
+    var col = COLORES[c.color], corta = c.manga === "corta";
+    var mangas = corta
+      ? ["M104,46 L66,64 L48,122 L84,134 L96,98 Z", "M196,46 L234,64 L252,122 L216,134 L204,98 Z"]
+      : ["M104,46 L66,64 L40,236 L70,244 L96,108 Z", "M196,46 L234,64 L260,236 L230,244 L204,108 Z", "M40,236 L70,244 L68,260 L38,252 Z", "M260,236 L230,244 L232,260 L262,250 Z"];
+    var torso = "M104,46 L128,40 Q150,50 172,40 L196,46 L206,100 L212,294 Q150,304 88,294 L94,100 Z";
+    var cuello = ["M128,38 L150,64 L134,84 L110,52 Z", "M172,38 L150,64 L166,84 L190,52 Z"];
+    var s = '<svg viewBox="30 30 245 280" xmlns="http://www.w3.org/2000/svg">';
+    mangas.concat([torso], cuello).forEach(function (d) { s += '<path d="' + d + '" fill="' + col.hex + '" stroke="rgba(0,0,0,.38)" stroke-width="2" stroke-linejoin="round"/>'; });
+    cuello.forEach(function (d) { s += '<path d="' + d + '" fill="rgba(0,0,0,.12)"/>'; });
+    s += '<line x1="150" y1="64" x2="150" y2="298" stroke="rgba(0,0,0,.28)" stroke-width="1.6"/>';
+    [100, 140, 180, 220, 260].forEach(function (y) { s += '<circle cx="150" cy="' + y + '" r="3.6" fill="' + (col.osc ? "#D9D5CB" : "#5A5040") + '"/>'; });
+    if (conPrecio) {
+      s += '<path d="M186,50 Q214,60 222,78" fill="none" stroke="#8A8070" stroke-width="1.4"/><g transform="rotate(14 240 98)"><path d="M214,80 L268,80 L268,118 L214,118 L206,99 Z" fill="#F3EFE4" stroke="#8A8070"/><circle cx="214" cy="99" r="2.6" fill="#8A8070"/>' +
+        '<text x="242" y="104" text-anchor="middle" style="font:600 12px \'Martian Mono\',ui-monospace,monospace;fill:#2A2620">' + PRECIOS[c.precio].v + '</text></g>';
+    }
+    return s + "</svg>";
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var botones = [];
+  datos.forEach(function (_, i) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "cam";
+    b.addEventListener("click", function () { if (timer || !etiquetas) return; datos[i].gusto = 1 - datos[i].gusto; nueva = i; render(); });
+    $("camisas").appendChild(b); botones.push(b);
+  });
+  function renderDatos() {
+    datos.forEach(function (c, i) {
+      var b = botones[i];
+      b.innerHTML = camisa(c) + "<small>" + PRECIOS[c.precio].v + '</small>' + (etiquetas ? '<span class="marca ' + (c.gusto ? "si" : "no") + '">' + (c.gusto ? "✓" : "✗") + "</span>" : '<span class="marca q">?</span>');
+      b.setAttribute("aria-label", COLORES[c.color].n + ", manga " + MANGAS[c.manga].toLowerCase() + ", " + PRECIOS[c.precio].n.toLowerCase() + ": " + (c.gusto ? "gustó" : "no gustó") + ". Toca para cambiar.");
+      b.classList.toggle("fuera", i >= usadas);
+      b.classList.remove("nueva");
+      if (i === nueva) { void b.offsetWidth; b.classList.add("nueva"); }
+    });
+    nueva = -1;
+  }
+
+  function renderModelo(m) {
+    var html = "";
+    GRUPOS.forEach(function (g) {
+      html += '<div class="grupo"><h3>' + g.n + "</h3>";
+      g.op.forEach(function (o) {
+        var r = m[g.k + ":" + o], pct = r.total ? r.si / r.total : null;
+        html += '<div class="fila' + (nueva_[g.k] === o ? " usa" : "") + '"><span>' + g.nom(o) + '</span><span class="bar"><i style="width:' + (pct == null ? 0 : Math.round(pct * 100)) + "%;background:var(--" + (pct != null && pct >= .5 ? "si" : "no") + ')"></i></span>' +
+          '<span class="val">' + (pct == null ? (etiquetas ? "sin datos" : "sin etiqueta") : "<b>" + Math.round(pct * 100) + "%</b> · " + r.si + "/" + r.total) + "</span></div>";
+      });
+      html += "</div>";
+    });
+    $("reglas").innerHTML = html;
+    var ok = 0;
+    datos.slice(0, usadas).forEach(function (c) { if ((predecir(m, c).p >= .5 ? 1 : 0) === c.gusto) ok++; });
+    $("acierta").textContent = usadas && etiquetas ? ok + "/" + usadas : "—";
+  }
+
+  function chips(id, grupo, lista) {
+    lista.forEach(function (k) {
+      var b = document.createElement("button"); b.type = "button"; b.dataset.k = k;
+      b.innerHTML = (grupo === "color" ? '<i style="background:' + COLORES[k].hex + '"></i>' : "") + GRUPOS.filter(function (g) { return g.k === grupo; })[0].nom(k) + (grupo === "precio" ? " " + PRECIOS[k].v : "");
+      b.addEventListener("click", function () { nueva_[grupo] = k; render(); });
+      $(id).appendChild(b);
+    });
+  }
+  chips("optColor", "color", ["azul", "blanco", "mostaza"]);
+  chips("optManga", "manga", ["corta", "larga"]);
+  chips("optPrecio", "precio", ["barata", "cara"]);
+
+  function renderPrediccion(m) {
+    [["optColor", "color"], ["optManga", "manga"], ["optPrecio", "precio"]].forEach(function (x) {
+      Array.prototype.forEach.call($(x[0]).children, function (b) { b.setAttribute("aria-pressed", b.dataset.k === nueva_[x[1]] ? "true" : "false"); });
+    });
+    $("camisaGrande").innerHTML = camisa(nueva_, true);
+    var r = predecir(m, nueva_), p = r.p, pc = Math.round(p * 100);
+    $("pct").textContent = pc + "%";
+    $("pct").style.color = !r.partes.length ? "var(--ink-soft)" : p >= .5 ? "var(--si)" : "var(--no)";
+    $("aguja").style.left = pc + "%";
+    $("veredicto").textContent = !r.partes.length ? (etiquetas ? "No sabe: no tiene datos" : "No puede aprender: faltan etiquetas") : p >= .7 ? "Muy probable que guste" : p >= .5 ? "Puede que guste" : p > .3 ? "Puede que no guste" : "Muy probable que no guste";
+    $("formula").innerHTML = '<span class="etq-mini">Cómo lo calculó: promedio</span><div class="f-ops">' + (r.partes.length
+      ? "(" + r.partes.map(function (x) { return '<span class="t">' + Math.round(x * 100) + "%</span>"; }).join("+") + ") ÷ " + r.partes.length + ' = <span class="t res">' + pc + "%</span>"
+      : (etiquetas ? "Sin datos" : "Sin etiquetas") + ": 50%, es adivinar.") + "</div>";
+  }
+
+  var timer = null;
+  $("entrenar").addEventListener("click", function () {
+    if (timer) { clearInterval(timer); timer = null; usadas = datos.length; $("entrenar").textContent = "▶ Entrenar desde cero"; render(); return; }
+    usadas = 0; render();
+    $("entrenar").textContent = "■ Detener";
+    timer = setInterval(function () {
+      nueva = usadas; usadas++; render();
+      if (usadas >= datos.length) { clearInterval(timer); timer = null; $("entrenar").textContent = "▶ Entrenar desde cero"; }
+    }, 650);
+  });
+  $("restaurar").addEventListener("click", function () {
+    if (timer) { clearInterval(timer); timer = null; $("entrenar").textContent = "▶ Entrenar desde cero"; }
+    restaurar(); render();
+  });
+
+
+  var IDEAS = [
+    { l: "A", t: "Elegante para fiestas", c: { color: "blanco", manga: "larga", precio: "cara" } },
+    { l: "B", t: "Fresca para vacaciones", c: { color: "azul", manga: "corta", precio: "barata" } },
+    { l: "C", t: "Color de temporada", c: { color: "mostaza", manga: "corta", precio: "cara" } }
+  ];
+  var revelado = false;
+  function describir(c) { return COLORES[c.color].n + ", manga " + MANGAS[c.manga].toLowerCase() + ", " + PRECIOS[c.precio].v; }
+  var nube = "";
+  IDEAS.forEach(function (idea, i) {
+    var x = 246 + i * 52;
+    nube += '<svg x="' + x + '" y="40" width="44" height="52" viewBox="30 30 245 280">' + camisa(idea.c).replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "") + "</svg>" +
+      '<text x="' + (x + 22) + '" y="110" text-anchor="middle" style="font:700 13px var(--f-body);fill:var(--pizarra)">' + idea.l + "</text>";
+  });
+  nube += '<text x="318" y="134" text-anchor="middle" style="font:700 15px var(--f-body);fill:var(--ink)">¿Cuál?</text>';
+  $("nubeCamisas").innerHTML = nube;
+  IDEAS.forEach(function (idea) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "idea";
+    b.addEventListener("click", function () {
+      nueva_ = { color: idea.c.color, manga: idea.c.manga, precio: idea.c.precio }; render();
+      $("paso3").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    $("ideas").appendChild(b); idea.el = b;
+  });
+  $("revelar").addEventListener("click", function () { revelado = !revelado; render(); });
+  function renderIdeas(m) {
+    var ps = IDEAS.map(function (idea) { return predecir(m, idea.c).p; });
+    var mejor = ps.indexOf(Math.max.apply(null, ps));
+    IDEAS.forEach(function (idea, i) {
+      var p = ps[i], pc = Math.round(p * 100), es = revelado && etiquetas && i === mejor;
+      idea.el.className = "idea" + (es ? " mejor" : "");
+      idea.el.setAttribute("aria-label", "Opción " + idea.l + ": " + describir(idea.c) + (revelado ? ", " + pc + "% de que guste" : "") + ". Ver el cálculo.");
+      idea.el.innerHTML = '<span class="letra">' + idea.l + "</span>" + (es ? '<span class="sello">Mejor apuesta</span>' : "") + camisa(idea.c) +
+        "<b>" + idea.t + "</b><small>" + describir(idea.c) + "</small>" +
+        '<span class="pron' + (revelado ? "" : " oculto") + '"' + (revelado ? ' style="color:var(--' + (p >= .5 ? "si" : "no") + ')"' : "") + ">" + (revelado ? pc + "%" : "¿ %?") + "</span>" +
+        '<span class="mini-bar"><i style="width:' + (revelado ? pc : 0) + "%;background:var(--" + (p >= .5 ? "si" : "no") + ')"></i></span>';
+    });
+    $("revelar").textContent = revelado ? "Ocultar pronóstico" : "Preguntarle al modelo";
+    $("pistaIdeas").textContent = revelado ? "Toca una opción para ver cómo lo calculó." : "Antes de revelar: ¿cuál elegirían ustedes?";
+    var d = $("decision");
+    d.hidden = !revelado;
+    if (revelado && !etiquetas) d.innerHTML = "Sin etiquetas, el modelo no puede ayudar a Laura: a todas les da 50%.";
+    else if (revelado) d.innerHTML = "Con estos datos, Laura saca la <b>opción " + IDEAS[mejor].l + "</b> en diciembre: " + Math.round(ps[mejor] * 100) + "% de probabilidad de que guste. Si cambian los datos, la decisión puede cambiar.";
+  }
+
+  $("swEtiquetas").addEventListener("click", function () { etiquetas = !etiquetas; render(); });
+  function renderEtiquetado() {
+    var c = datos[0];
+    $("anatCamisa").innerHTML = camisa(c);
+    $("anatX").innerHTML = '<span class="celda"><small>Color</small><b>' + COLORES[c.color].n + '</b></span><span class="celda"><small>Manga</small><b>' + MANGAS[c.manga] + '</b></span><span class="celda"><small>Precio</small><b>' + PRECIOS[c.precio].v + "</b></span>";
+    $("anatY").innerHTML = '<span class="celda"><small>¿Gustó?</small>' + (etiquetas ? '<b class="' + (c.gusto ? "si" : "no") + '">' + (c.gusto ? "✓ Sí" : "✗ No") + "</b>" : '<b class="q">?</b>') + "</span>";
+    $("swEtiquetas").setAttribute("aria-checked", etiquetas ? "true" : "false");
+    $("swTxt").textContent = etiquetas ? "Con etiquetas" : "Sin etiquetas";
+    $("etEstado").innerHTML = etiquetas
+      ? '<b class="si">El modelo puede aprender:</b> sabe cuáles camisas gustaron y cuáles no, y puede contar.'
+      : '<b class="no">El modelo no puede aprender:</b> ve 20 camisas, pero no sabe cuáles gustaron. Mira cómo quedan los pasos de abajo.';
+  }
+
+  function render() { var m = entrenar(); renderEtiquetado(); renderDatos(); renderModelo(m); renderPrediccion(m); renderIdeas(m); }
+  render();
+})();
+</script>
+</body></html>

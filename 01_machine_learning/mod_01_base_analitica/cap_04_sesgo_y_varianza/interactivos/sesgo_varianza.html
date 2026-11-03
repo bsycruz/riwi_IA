@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Subajuste, sobreajuste, sesgo y varianza</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Martian+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --bg: #F9FAFC;
+  --surface: #FFFFFF;
+  --surface-2: #EFEDFF;
+  --ink: #181E4B;
+  --ink-soft: #5B6280;
+  --line: #DCDBF0;
+  --grid: #ECEBF7;
+  --pizarra: #6B5CFF;
+  --pizarra-ink: #FFFFFF;
+  --prueba: #C98E22;
+  --sub: #4C8FD6;
+  --justo: #2E9C78;
+  --sobre: #D9503B;
+  --sub-bg: rgba(76, 143, 214, .12);
+  --justo-bg: rgba(46, 156, 120, .12);
+  --sobre-bg: rgba(217, 80, 59, .10);
+  --banda: #181E4B;
+  --banda-ink: #FFFFFF;
+  --banda-soft: #C3C6E6;
+  --logo-letras: #FFFFFF;
+  --f-body: "Ubuntu", "Trebuchet MS", system-ui, sans-serif;
+  --f-data: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1230; --surface: #181E4B; --surface-2: #242B62; --ink: #EEF0FA; --ink-soft: #A9AECB; --line: #2F376E; --grid: #222A5E;
+    --pizarra: #8A7DFF; --pizarra-ink: #FFFFFF; --prueba: #E3AE4C; --sub: #79B2EE; --justo: #5ACCA4; --sobre: #FE7B68;
+    --sub-bg: rgba(121, 178, 238, .14); --justo-bg: rgba(90, 204, 164, .14); --sobre-bg: rgba(254, 123, 104, .13);
+    --banda: #232A62; --banda-ink: #FFFFFF; --banda-soft: #C3C6E6; --logo-letras: #FFFFFF; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1230; --surface: #181E4B; --surface-2: #242B62; --ink: #EEF0FA; --ink-soft: #A9AECB; --line: #2F376E; --grid: #222A5E;
+  --pizarra: #8A7DFF; --pizarra-ink: #FFFFFF; --prueba: #E3AE4C; --sub: #79B2EE; --justo: #5ACCA4; --sobre: #FE7B68;
+  --sub-bg: rgba(121, 178, 238, .14); --justo-bg: rgba(90, 204, 164, .14); --sobre-bg: rgba(254, 123, 104, .13);
+  --banda: #232A62; --banda-ink: #FFFFFF; --banda-soft: #C3C6E6; --logo-letras: #FFFFFF; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.etq { font-family: var(--f-data); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+.num { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+
+header { display: flex; flex-direction: column; gap: 14px; background: var(--banda); color: var(--banda-ink); border-radius: 14px; padding: 22px 26px 26px; position: relative; overflow: hidden; }
+header::after { content: ""; position: absolute; right: -40px; bottom: -70px; width: 260px; height: 200px; border: 18px solid var(--pizarra); border-radius: 50%; opacity: .22; pointer-events: none; }
+.marca-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; position: relative; }
+.marca-bar svg { height: 34px; width: auto; display: block; }
+.marca-bar span { font-family: var(--f-data); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--banda-soft); }
+.tema { position: relative; align-self: flex-start; background: var(--pizarra); color: var(--pizarra-ink); font-weight: 700; font-size: clamp(1rem, 2.4vw, 1.25rem); padding: 6px 14px; border-radius: 8px; }
+header h1 { font-weight: 700; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.05; position: relative; }
+header h1 em { font-style: normal; color: #A89FFF; }
+header p { font-size: 1.1rem; color: var(--banda-soft); max-width: 64ch; position: relative; }
+header p strong { color: var(--banda-ink); }
+
+.tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cab { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cab h2 { font-size: 1.3rem; font-weight: 700; }
+
+.analogia { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.est { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; text-align: left; font: inherit; color: inherit; transition: border-color .2s, box-shadow .2s, transform .2s; }
+.est:hover { transform: translateY(-2px); }
+.est .tit { display: flex; align-items: center; gap: 10px; }
+.est .tit svg { width: 40px; height: 40px; flex: none; }
+.est h3 { font-size: 1.08rem; font-weight: 700; }
+.est h3 small { display: block; font-weight: 400; font-size: .78rem; color: var(--ink-soft); }
+.est p { font-size: .9rem; color: var(--ink-soft); }
+.notas { display: grid; grid-template-columns: 92px minmax(0, 1fr) 40px; gap: 4px 8px; align-items: center; font-size: .8rem; }
+.notas .b { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.notas .b i { display: block; height: 100%; border-radius: 4px; }
+.notas .v { font-family: var(--f-data); text-align: right; font-weight: 600; }
+.est.activo.sub { border: 2px solid var(--sub); box-shadow: 0 8px 22px -14px var(--sub); }
+.est.activo.justo { border: 2px solid var(--justo); box-shadow: 0 8px 22px -14px var(--justo); }
+.est.activo.sobre { border: 2px solid var(--sobre); box-shadow: 0 8px 22px -14px var(--sobre); }
+.est .ahora { display: none; align-self: flex-start; font-size: .7rem; font-weight: 700; color: #fff; padding: 2px 8px; border-radius: 999px; }
+.est.activo .ahora { display: inline-block; }
+.est.sub .ahora { background: var(--sub); } .est.justo .ahora { background: var(--justo); } .est.sobre .ahora { background: var(--sobre); }
+
+.lab { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.toggles { display: flex; gap: 6px; flex-wrap: wrap; }
+.toggles button { font: 600 .84rem var(--f-body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.toggles button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+svg.graf { width: 100%; height: auto; display: block; }
+svg.graf text { font-family: var(--f-data); font-size: 11px; fill: var(--ink-soft); }
+svg.graf .eje-tit { font-family: var(--f-body); font-size: 13px; font-weight: 500; fill: var(--ink); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .84rem; color: var(--ink-soft); }
+.leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+.leyenda i { display: inline-block; flex: none; }
+
+.panel { gap: 16px; }
+.diag { border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; transition: background .3s; }
+.diag.sub { background: var(--sub-bg); } .diag.justo { background: var(--justo-bg); } .diag.sobre { background: var(--sobre-bg); }
+.diag .estado { font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+.diag.sub .estado { color: var(--sub); } .diag.justo .estado { color: var(--justo); } .diag.sobre .estado { color: var(--sobre); }
+.diag p { font-size: .92rem; }
+.control { display: flex; flex-direction: column; gap: 6px; }
+.control-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.control-top label { font-weight: 700; font-size: .95rem; }
+.control-top label small { display: block; font-weight: 400; color: var(--ink-soft); font-size: .8rem; }
+.control-top .num { font-weight: 600; font-size: 1.05rem; white-space: nowrap; }
+input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 24px; background: transparent; cursor: pointer; --c: var(--pizarra); }
+input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--surface-2); }
+input[type="range"]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--surface-2); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--c); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--c); margin-top: -8px; }
+input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--c); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--c); }
+#rGrado { height: 30px; }
+.zonas-grado { display: flex; font-size: .68rem; font-family: var(--f-data); text-align: center; margin-top: -4px; }
+.zonas-grado span { padding-top: 2px; border-top: 3px solid; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.zonas-grado .sub { border-color: var(--sub); color: var(--sub); } .zonas-grado .justo { border-color: var(--justo); color: var(--justo); } .zonas-grado .sobre { border-color: var(--sobre); color: var(--sobre); }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.presets button { font: 600 .82rem var(--f-body); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.presets button:hover { border-color: var(--pizarra); }
+.errores { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 14px; }
+.err-fila { display: grid; grid-template-columns: 118px minmax(0, 1fr) 70px; gap: 8px; align-items: center; font-size: .88rem; }
+.err-fila .b { height: 14px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.err-fila .b i { display: block; height: 100%; border-radius: 4px; transition: width .3s ease; }
+.err-fila .v { font-family: var(--f-data); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.brecha { font-size: .88rem; color: var(--ink-soft); }
+.brecha b { font-family: var(--f-data); color: var(--ink); }
+.botones { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { font: 600 .92rem var(--f-body); padding: 9px 14px; border-radius: 6px; cursor: pointer; border: 1px solid var(--pizarra); background: transparent; color: var(--pizarra); white-space: nowrap; }
+.btn.primario { background: var(--pizarra); color: var(--pizarra-ink); }
+.btn:hover { background: var(--pizarra); color: var(--pizarra-ink); }
+.btn:disabled { opacity: .35; cursor: default; }
+.btn:disabled:hover { background: transparent; color: var(--pizarra); }
+button:focus-visible, input:focus-visible, .est:focus-visible { outline: 2px solid var(--pizarra); outline-offset: 2px; }
+.mas { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+.fila2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+#curvaU { cursor: pointer; }
+.explica { gap: 12px; }
+.explica .chip-estado { align-self: flex-start; font-weight: 700; font-size: .8rem; color: #fff; padding: 3px 10px; border-radius: 999px; }
+.explica h3 { font-size: 1.25rem; font-weight: 700; }
+.explica p { font-size: .96rem; color: var(--ink-soft); }
+.explica p b { color: var(--ink); }
+.explica .que { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; }
+.explica .que h4 { font-size: .9rem; margin-bottom: 4px; }
+.explica .que ul { margin: 0; padding-left: 1.1em; font-size: .9rem; color: var(--ink-soft); display: flex; flex-direction: column; gap: 3px; }
+
+.leccion { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; border-bottom: 1px solid var(--line); }
+.tabs button { flex: none; display: inline-flex; align-items: center; gap: 8px; font: 600 .92rem var(--f-body); padding: 10px 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--ink-soft); cursor: pointer; margin-bottom: -1px; }
+.tabs button .tn { width: 24px; height: 24px; border-radius: 50%; background: var(--surface-2); color: var(--ink); display: grid; place-items: center; font-size: .8rem; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--pizarra); }
+.tabs button[aria-selected="true"] .tn { background: var(--pizarra); color: var(--pizarra-ink); }
+.panel-tab { display: flex; flex-direction: column; gap: 14px; }
+.nav-tab { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
+.teo { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.teo-txt { display: flex; flex-direction: column; gap: 10px; font-size: .98rem; }
+.teo-txt h3 { font-size: 1.35rem; font-weight: 700; }
+.teo-txt h3 small { display: block; font-size: .85rem; font-weight: 400; color: var(--ink-soft); }
+.teo-txt p { color: var(--ink-soft); max-width: 62ch; }
+.teo-txt p b { color: var(--ink); }
+.teo-txt ul { margin: 0; padding-left: 1.15em; display: flex; flex-direction: column; gap: 5px; color: var(--ink-soft); }
+.teo-txt ul b { color: var(--ink); }
+.def { border-left: 4px solid var(--pizarra); background: var(--surface-2); border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 1rem; }
+.def b { color: var(--pizarra); }
+.teo-vis { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.teo-vis .btn { align-self: flex-start; }
+.reparto { display: flex; height: 40px; border-radius: 8px; overflow: hidden; font-weight: 700; font-size: .85rem; color: #fff; }
+.reparto div { display: flex; align-items: center; justify-content: center; }
+.dianas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.diana { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; font-size: .8rem; }
+.diana svg { width: 100%; max-width: 150px; height: auto; }
+.diana b { font-size: .86rem; }
+.diana span { color: var(--ink-soft); }
+.diana.meta { background: var(--justo-bg); border-radius: 8px; padding: 6px; }
+.tabla-box { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: .9rem; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--f-data); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+td .pill { font-weight: 700; font-size: .78rem; padding: 2px 9px; border-radius: 999px; color: #fff; white-space: nowrap; }
+.remedios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.remedio { border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.remedio.sub { background: var(--sub-bg); } .remedio.sobre { background: var(--sobre-bg); }
+.remedio h4 { font-size: 1.02rem; }
+.remedio.sub h4 { color: var(--sub); } .remedio.sobre h4 { color: var(--sobre); }
+.remedio ul { margin: 0; padding-left: 1.1em; font-size: .92rem; display: flex; flex-direction: column; gap: 4px; }
+pre.codigo { margin: 0; background: var(--banda); color: #E6E8F5; border-radius: 8px; padding: 12px 14px; font: .8rem/1.6 var(--f-data); overflow-x: auto; }
+pre.codigo .c { color: #9AA0C8; }
+
+.claves { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--line); }
+.claves div { padding: 14px 16px 14px 0; display: flex; flex-direction: column; gap: 2px; }
+.claves div + div { border-left: 1px solid var(--line); padding-left: 16px; }
+.claves div:nth-child(4n+1) { border-left: 0; padding-left: 0; }
+.claves div:nth-child(n+5) { border-top: 1px solid var(--line); }
+.claves b { font-weight: 700; font-size: 1.02rem; color: var(--pizarra); }
+.claves span { font-size: .88rem; color: var(--ink-soft); }
+.pie { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pie svg { height: 26px; width: auto; }
+.pie span { font-size: .82rem; color: var(--ink-soft); }
+
+@media (max-width: 1000px) {
+  .lab, .fila2, .teo { grid-template-columns: minmax(0, 1fr); }
+  .claves { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .claves div:nth-child(4n+1) { border-left: 1px solid var(--line); padding-left: 16px; }
+  .claves div:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .claves div:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 760px) { .analogia { grid-template-columns: minmax(0, 1fr); } .remedios { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) {
+  header { padding: 18px; }
+  .tarjeta, .leccion { padding: 14px; }
+  .err-fila { grid-template-columns: 96px minmax(0, 1fr) 62px; }
+  .claves { grid-template-columns: minmax(0, 1fr); }
+  .claves div + div, .claves div:nth-child(odd) { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+  .nav-tab .btn { padding: 8px 10px; font-size: .85rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.album { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.examen { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.foto { margin: 0; border: 2px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); display: flex; flex-direction: column; transition: border-color .25s; }
+.foto svg { width: 100%; height: auto; display: block; aspect-ratio: 1; }
+.foto figcaption { padding: 7px 8px 9px; display: flex; flex-direction: column; gap: 3px; font-size: .8rem; line-height: 1.3; }
+.foto figcaption b { font-size: .86rem; }
+.foto .real { align-self: flex-start; font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+.foto .real.si { background: var(--c-si-bg); color: var(--c-si); }
+.foto .real.no { background: var(--surface-2); color: var(--ink-soft); }
+.foto .dijo { display: flex; align-items: center; gap: 5px; font-weight: 600; }
+.foto .porque { color: var(--sobre); font-size: .74rem; }
+.foto.ok { border-color: color-mix(in srgb, var(--justo) 55%, var(--line)); }
+.foto.mal { border-color: var(--sobre); background: var(--sobre-bg); }
+.lg { width: 14px; height: 14px; border-radius: 50%; display: inline-block; flex: none; position: relative; }
+.lg.ok { background: var(--justo); }
+.lg.mal { background: var(--sobre); }
+.lg.ok::after { content: "✓"; position: absolute; inset: 0; color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+.lg.mal::after { content: "✗"; position: absolute; inset: 0; color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+.album-pie { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.album-pie .pista { font-size: .88rem; color: var(--ink-soft); }
+.lab { grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); }
+.reglas-box { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.reglas-box ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 5px; font-size: .93rem; font-weight: 500; }
+.reglas-box .tag { display: inline-block; margin-left: 6px; font-size: .66rem; font-weight: 700; color: #fff; background: var(--sobre); padding: 1px 7px; border-radius: 999px; vertical-align: 1px; }
+:root { --c-si: #6B5CFF; --c-si-bg: rgba(107, 92, 255, .14); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-si: #A89FFF; --c-si-bg: rgba(138, 125, 255, .22); } }
+:root[data-theme="dark"] { --c-si: #A89FFF; --c-si-bg: rgba(138, 125, 255, .22); }
+.bv-intro { font-size: .98rem; color: var(--ink-soft); max-width: 80ch; }
+.bv-intro b { color: var(--ink); }
+.bv-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.matriz-box { overflow-x: auto; min-width: 0; }
+.matriz { display: flex; flex-direction: column; gap: 4px; min-width: 620px; }
+.mz-fila { display: grid; grid-template-columns: 150px repeat(13, minmax(0, 1fr)); gap: 4px; align-items: center; }
+.mz-nom { display: flex; flex-direction: column; font-size: .82rem; line-height: 1.25; }
+.mz-nom small { font-size: .68rem; color: var(--ink-soft); }
+.mz-ico svg { width: 100%; height: auto; display: block; border-radius: 5px; }
+.mz-c { height: 30px; border-radius: 5px; background: var(--bg); border: 1px solid var(--line); display: grid; place-items: center; }
+.mz-c.mal { background: var(--sobre-bg); border-color: var(--sobre); }
+.mz-c i, .mz-ley i { width: 13px; height: 13px; border-radius: 50%; display: inline-block; }
+i.si { background: var(--c-si); }
+i.no { border: 2px solid var(--ink-soft); background: transparent; }
+.mz-real { border-top: 2px solid var(--ink); padding-top: 4px; margin-top: 2px; }
+.mz-ley { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-soft); margin-top: 6px; }
+.mz-ley > span { display: inline-flex; align-items: center; gap: 6px; }
+.mini-c { width: 16px; height: 16px; display: inline-block; }
+.bv-lado { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.bv-metricas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bv-m { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.bv-m > b { font-family: var(--f-data); font-size: 1.7rem; line-height: 1; }
+.bv-m small b { color: var(--ink); }
+.bv-m .b { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.bv-m .b i { display: block; height: 100%; border-radius: 4px; transition: width .3s; }
+.bv-m small { font-size: .74rem; color: var(--ink-soft); line-height: 1.3; }
+.bv-texto { font-size: .94rem; color: var(--ink-soft); background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+.bv-texto b { color: var(--ink); }
+.reg-tres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.reg-caso { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.reg-caso svg { width: 100%; height: auto; display: block; }
+.reg-caso figcaption { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; }
+.reg-caso .chip-estado { align-self: flex-start; font-weight: 700; font-size: .78rem; color: #fff; padding: 2px 10px; border-radius: 999px; }
+.reg-err { font-size: .78rem; color: var(--ink-soft); }
+.reg-err b { font-family: var(--f-data); color: var(--ink); }
+@media (max-width: 1000px) { .bv-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { .reg-tres { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .album, .examen { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.indice { display: flex; gap: 8px; flex-wrap: wrap; }
+.indice a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 600; font-size: .92rem; }
+.indice a:hover { border-color: var(--pizarra); }
+.indice .tn { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: .82rem; }
+.tn.sub { background: var(--sub); } .tn.sobre { background: var(--sobre); } .tn.justo { background: var(--justo); }
+.album-sec .album { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.foto.neutra { border-color: var(--line); }
+.concepto { background: var(--surface); border: 1px solid var(--line); border-top: 5px solid; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 16px; }
+.concepto.sub { border-top-color: var(--sub); } .concepto.sobre { border-top-color: var(--sobre); } .concepto.justo { border-top-color: var(--justo); }
+.con-cab { display: flex; gap: 16px; align-items: flex-start; }
+.con-num { flex: none; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 1.6rem; }
+.sub .con-num { background: var(--sub); } .sobre .con-num { background: var(--sobre); } .justo .con-num { background: var(--justo); }
+.con-cab h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; line-height: 1.1; }
+.con-cab h2 small { font-size: .55em; font-weight: 400; color: var(--ink-soft); margin-left: 6px; }
+.con-def { font-size: 1.08rem; margin-top: 4px; max-width: 70ch; }
+.sub .con-def b { color: var(--sub); } .sobre .con-def b { color: var(--sobre); } .justo .con-def b { color: var(--justo); }
+.con-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr); gap: 20px; align-items: start; }
+.con-lado { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.con-lado .btn { align-self: flex-start; white-space: normal; text-align: left; }
+.regla-grande { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.regla-grande p { font-size: 1.3rem; font-weight: 700; }
+.regla-grande ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; font-size: .9rem; font-weight: 500; }
+.regla-grande .tag { display: inline-block; margin-left: 6px; font-size: .64rem; font-weight: 700; color: #fff; background: var(--sobre); padding: 1px 7px; border-radius: 999px; vertical-align: 1px; }
+.notas2 { display: flex; flex-direction: column; gap: 8px; }
+.senales { margin: 0; padding-left: 1.15em; display: flex; flex-direction: column; gap: 6px; font-size: .94rem; color: var(--ink-soft); }
+.senales b { color: var(--ink); }
+.con-examen { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.examen.chico { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 1180px) { .examen.chico { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .examen.chico { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.examen.chico .foto figcaption { padding: 5px 6px 7px; font-size: .74rem; }
+.examen.chico .foto figcaption b { font-size: .78rem; }
+.examen.chico .porque { font-size: .68rem; }
+.puente { display: flex; flex-direction: column; gap: 14px; padding: 4px 2px; }
+.puente > p { font-size: 1.05rem; max-width: 80ch; color: var(--ink-soft); }
+.puente > p b { color: var(--ink); }
+.maquinas { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.maq { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+.maq b { font-size: .92rem; }
+.maq-fotos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 4px; }
+.maq-fotos svg { width: 100%; height: auto; display: block; border-radius: 6px; }
+.mz-fila { grid-template-columns: 130px repeat(13, minmax(0, 1fr)); }
+.diana-uno { display: flex; align-items: center; gap: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.diana-uno svg { width: 96px; height: 96px; flex: none; }
+.diana-uno div { display: flex; flex-direction: column; gap: 2px; font-size: .88rem; color: var(--ink-soft); }
+.diana-uno b { color: var(--ink); font-size: 1rem; }
+.medidor { display: flex; flex-direction: column; gap: 4px; }
+.medidor > b { font-family: var(--f-data); font-size: 2rem; line-height: 1; }
+.medidor .b { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.medidor .b i { display: block; height: 100%; border-radius: 5px; }
+.detector { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 20px; align-items: start; }
+.det-panel { display: flex; flex-direction: column; gap: 14px; }
+.det-panel .errores { border-top: 0; padding-top: 0; }
+.det-graf { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.preguntas { display: flex; flex-direction: column; gap: 6px; }
+.preg { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: .9rem; }
+.preg b { flex: none; min-width: 40px; text-align: center; padding: 2px 8px; border-radius: 999px; font-size: .8rem; }
+.preg b.sip { background: var(--ink); color: var(--surface); }
+.preg b.nop { background: var(--surface-2); color: var(--ink-soft); }
+.veredicto { border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.veredicto.sub { background: var(--sub-bg); } .veredicto.justo { background: var(--justo-bg); } .veredicto.sobre { background: var(--sobre-bg); }
+.veredicto .pill { align-self: flex-start; color: #fff; font-weight: 700; font-size: .8rem; padding: 2px 10px; border-radius: 999px; }
+.det-panel .btn { align-self: flex-start; }
+tr.on td { background: var(--surface-2); font-weight: 700; }
+.resumen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.res { border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.res.sub { background: var(--sub-bg); } .res.sobre { background: var(--sobre-bg); }
+.res b { font-size: 1.1rem; }
+.res.sub b { color: var(--sub); } .res.sobre b { color: var(--sobre); }
+.res span { font-size: .9rem; color: var(--ink-soft); }
+@media (max-width: 1000px) { .con-grid, .detector { grid-template-columns: minmax(0, 1fr); } .album-sec .album { grid-template-columns: repeat(4, minmax(0, 1fr)); } .maquinas { grid-template-columns: repeat(3, minmax(0, 1fr)); } .resumen { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .maquinas { grid-template-columns: repeat(2, minmax(0, 1fr)); } .con-cab { gap: 12px; } .con-num { width: 42px; height: 42px; font-size: 1.3rem; } .concepto { padding: 14px; } .resumen { grid-template-columns: minmax(0, 1fr); } .examen.chico { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.doble { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.fila-fotos { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.fila-fotos .foto figcaption { padding: 5px 6px 7px; font-size: .74rem; }
+.fila-fotos .foto figcaption b { font-size: .78rem; }
+.fila-fotos.resultado { align-self: center; }
+.fila-fotos.resultado .dijo { font-size: .78rem; }
+.con-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); align-items: center; }
+.clave { font-size: 1.02rem; font-weight: 500; }
+.sub .clave b { color: var(--sub); } .sobre .clave b { color: var(--sobre); } .justo .clave b { color: var(--justo); }
+.regla-grande ol { font-size: .95rem; }
+.con-num.reg { background: var(--pizarra); }
+#regresion { border-top-color: var(--pizarra); }
+#regresion .con-def b { color: var(--pizarra); }
+.puente { display: block; font-size: 1.1rem; text-align: center; color: var(--ink-soft); padding: 4px 0; max-width: none; }
+.puente b { color: var(--ink); }
+.tabla-maq { display: flex; flex-direction: column; gap: 6px; min-width: 0; overflow-x: auto; }
+.tm-fila { display: grid; grid-template-columns: 120px repeat(6, minmax(52px, 1fr)); gap: 6px; align-items: center; min-width: 480px; }
+.tm-nom { display: flex; flex-direction: column; gap: 3px; font-size: .86rem; }
+.tm-fotos { display: flex; gap: 3px; }
+.tm-fotos svg { width: 28px; height: 28px; border-radius: 4px; }
+.tm-ico svg { width: 100%; height: auto; display: block; border-radius: 6px; }
+.tm-c { text-align: center; font-size: .8rem; font-weight: 700; padding: 7px 2px; border-radius: 6px; background: var(--justo-bg); color: var(--ink); }
+.tm-c.mal { background: var(--sobre-bg); color: var(--sobre); box-shadow: inset 0 0 0 1.5px var(--sobre); }
+.tm-real .tm-c { background: var(--surface-2); }
+.tm-real { border-top: 2px solid var(--ink); padding-top: 6px; }
+.tm-ley { font-size: .8rem; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.tm-c.mini { display: inline-block; padding: 2px 8px; }
+.selector { display: flex; gap: 6px; flex-wrap: wrap; }
+.selector button { flex: 1 1 auto; font: 600 .92rem var(--f-body); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.selector button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.detector { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+@media (max-width: 1000px) { .doble { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .fila-fotos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <div class="marca-bar"><svg viewBox="0 0 246.192 70.793" role="img" aria-label="Riwi"><g>
+<path fill="#6b5cff" transform="translate(-220.45 -21.27)" d="M465.319,56.584a11.032,11.032,0,0,0-4.333-3.681L441.006,42.878c-1.873-.9-3.034-1.043-3.878-.508s-1.224,1.677-1.224,3.7v1.289a7.583,7.583,0,0,0,.893,4.051,7.556,7.556,0,0,0,3.268,2.577l15.907,7.738c.068.031.125.06.174.088-.055.031-.12.063-.2.1l-15.879,7.724a7.574,7.574,0,0,0-3.271,2.579,7.586,7.586,0,0,0-.894,4.052v1.288c0,2.027.377,3.17,1.223,3.7a2.083,2.083,0,0,0,1.147.314,6.73,6.73,0,0,0,2.757-.831l19.985-10.029a10.944,10.944,0,0,0,4.3-3.666,9.719,9.719,0,0,0,1.323-5.234,9.718,9.718,0,0,0-1.323-5.234"/>
+<path fill="#6b5cff" transform="translate(-37.296)" d="M106.123,1.075C105.586.361,104.226,0,102.082,0h-1.735a7.949,7.949,0,0,0-4.625,1.048,8.463,8.463,0,0,0-2.45,4.157L74.333,65.5c-.693,2.08-.773,3.5-.234,4.214s1.9,1.076,4.04,1.076h1.429a7.949,7.949,0,0,0,4.625-1.048,8.417,8.417,0,0,0,2.451-4.056l19.244-60.5c.692-2.014.773-3.4.236-4.116"/>
+<path fill="#6b5cff" transform="translate(0 -21.272)" d="M29.516,42.375c-.858-.543-2.024-.388-3.9.518L5.628,52.922a10.937,10.937,0,0,0-4.3,3.666A9.717,9.717,0,0,0,0,61.822a9.723,9.723,0,0,0,1.323,5.234,11.029,11.029,0,0,0,4.333,3.68L25.637,80.763a6.6,6.6,0,0,0,2.728.816,2.111,2.111,0,0,0,1.15-.309c.847-.533,1.224-1.677,1.224-3.7V76.276a7.575,7.575,0,0,0-.893-4.05,7.546,7.546,0,0,0-3.268-2.577L10.671,61.911c-.068-.032-.125-.061-.174-.088.055-.03.12-.064.2-.1L26.574,54a7.579,7.579,0,0,0,3.271-2.578,7.587,7.587,0,0,0,.894-4.053V46.079c0-2.027-.377-3.17-1.223-3.7"/>
+<g style="fill:var(--logo-letras)">
+<path transform="translate(-108.93 -17.961)" d="M222.632,35.515H220.8c-2.216,0-3.688.349-4.376,1.036s-1.037,2.161-1.037,4.376V80.322c0,2.217.349,3.689,1.036,4.375s2.159,1.038,4.377,1.038h1.827c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-197.176 -17.961)" d="M397.125,35.515H395.3c-2.215,0-3.688.349-4.376,1.036s-1.036,2.161-1.036,4.376V80.322c0,2.217.348,3.689,1.036,4.375s2.159,1.038,4.376,1.038h1.828c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-63.977 -3.538)" d="M148.672,47.043c8.9-2.275,13.349-8.8,13.349-19.48,0-13.745-7.318-20.568-21.854-20.568A1.749,1.749,0,0,0,138.5,8.209l-2.748,8.558a1.983,1.983,0,0,0,1.888,2.589h2.525c6.032,0,8.6,2.571,8.6,8.207,0,5.438-2.867,8.108-8.6,8.108h-8.378a2.884,2.884,0,0,0-2.746,2l-2.436,7.588a2.121,2.121,0,0,0,2.02,2.77h5.707L146.4,66.424c2.67,3.856,4.449,4.845,8.9,4.845h3.757c4.648,0,5.043-1.088,2.571-4.746Z"/>
+<path transform="translate(-130.426 -17.993)" d="M310.465,35.579H308.9a4.882,4.882,0,0,0-3.876,1.338c-.72.847-1.179,2.354-1.442,4.744l-2.7,28.532a8.3,8.3,0,0,1-.632,2.9.887.887,0,0,1-.815.357.922.922,0,0,1-.876-.388,7.838,7.838,0,0,1-.568-2.84l-2.278-24.49c-.353-3.7-1.216-6.249-2.637-7.795s-3.667-2.34-6.653-2.354v0h-.109v0c-2.986.014-5.226.805-6.653,2.354s-2.284,4.1-2.637,7.795l-2.278,24.49a7.838,7.838,0,0,1-.568,2.84.921.921,0,0,1-.876.388.887.887,0,0,1-.815-.357,8.3,8.3,0,0,1-.632-2.9l-2.7-28.532c-.263-2.39-.722-3.9-1.441-4.744a4.883,4.883,0,0,0-3.876-1.338h-1.565c-1.934,0-3.175.466-3.8,1.424-.573.886-.715,2.39-.45,4.733l3.13,30.072c.494,4.616,1.541,8.032,3.194,10.438,1.739,2.39,4.752,3.6,8.953,3.6,3.494,0,6.093-1.138,7.723-3.383,1.576-2.169,2.558-5.659,3-10.67l1.848-20.072h.985L288.709,71.8c.445,5.011,1.427,8.5,3,10.67,1.63,2.244,4.228,3.383,7.723,3.383,4.2,0,7.214-1.212,8.953-3.6,1.654-2.406,2.7-5.822,3.194-10.438l3.13-30.072c.266-2.343.123-3.847-.45-4.733-.622-.958-1.864-1.424-3.8-1.424"/>
+<path transform="translate(-197.763)" d="M400.581,0h-1.735a7.953,7.953,0,0,0-4.625,1.048,8.467,8.467,0,0,0-2.45,4.157l-.622,1.981a2.266,2.266,0,0,0,2.162,2.945h7.846a2.266,2.266,0,0,0,2.159-1.58l1.069-3.361c.693-2.014.773-3.4.236-4.116S402.725,0,400.581,0"/>
+</g></g></svg><span>Machine Learning · ¿aprendió o memorizó?</span></div>
+    <span class="tema">Subajuste · Sobreajuste · Sesgo · Varianza</span>
+    <h1>¿La máquina <em>aprendió</em> qué es un árbol?</h1>
+    <p>Estudió <strong>6 fotos</strong>. Después presenta un <strong>examen de 6 cosas nuevas</strong>. Veamos qué pasa cuando aprende poco, cuando aprende bien y cuando memoriza.</p>
+  </header>
+
+  <nav class="indice" aria-label="Contenido">
+    <a href="#subajuste"><span class="tn sub">1</span>Subajuste</a>
+    <a href="#sobreajuste"><span class="tn sobre">2</span>Sobreajuste</a>
+    <a href="#sesgo"><span class="tn sub">3</span>Sesgo</a>
+    <a href="#varianza"><span class="tn sobre">4</span>Varianza</a>
+    <a href="#detectar"><span class="tn justo">5</span>Cómo detectarlo</a>
+  </nav>
+
+  <div class="doble">
+    <section class="tarjeta"><div class="cab"><h2>Estudió estas fotos</h2><span class="etq">Entrenamiento</span></div><div class="fila-fotos" id="album"></div></section>
+    <section class="tarjeta"><div class="cab"><h2>Su examen</h2><span class="etq">Cosas que nunca vio</span></div><div class="fila-fotos" id="examen0"></div></section>
+  </div>
+
+  <section class="concepto sub" id="subajuste">
+    <div class="con-cab"><span class="con-num">1</span><div><h2>Subajuste</h2><p class="con-def">Aprendió <b>muy poco</b>. Su única regla es simple.</p></div></div>
+    <div class="con-grid">
+      <div class="con-lado">
+        <div class="regla-grande"><span class="etq">Lo que aprendió</span><p>“Si es verde, es árbol”</p></div>
+        <div class="notas2" id="n1"></div>
+        <p class="clave">Falla en el entrenamiento <b>y</b> en el examen.</p>
+      </div>
+      <div class="fila-fotos resultado" id="e1"></div>
+    </div>
+  </section>
+
+  <section class="concepto sobre" id="sobreajuste">
+    <div class="con-cab"><span class="con-num">2</span><div><h2>Sobreajuste</h2><p class="con-def">Aprendió <b>de memoria</b> los detalles de sus fotos.</p></div></div>
+    <div class="con-grid">
+      <div class="con-lado">
+        <div class="regla-grande"><span class="etq">Lo que memorizó</span><ol id="r2"></ol></div>
+        <div class="notas2" id="n2"></div>
+        <p class="clave">Perfecto en el entrenamiento, pero <b>falla en el examen</b>.</p>
+      </div>
+      <div class="fila-fotos resultado" id="e2"></div>
+    </div>
+  </section>
+
+  <section class="concepto justo">
+    <div class="con-cab"><span class="con-num">✓</span><div><h2>Lo ideal: buen ajuste</h2><p class="con-def">Aprendió <b>lo esencial</b>: “tiene tronco, tiene copa y es más alto que una persona”.</p></div></div>
+    <div class="con-grid">
+      <div class="con-lado"><div class="notas2" id="n3"></div><p class="clave">Bien en el entrenamiento <b>y</b> en el examen.</p></div>
+      <div class="fila-fotos resultado" id="e3"></div>
+    </div>
+  </section>
+
+  <section class="concepto" id="regresion">
+    <div class="con-cab"><span class="con-num reg">~</span><div><h2>¿Y cómo se ve en una gráfica de regresión?</h2><p class="con-def">La misma idea, pero con números. Aquí el modelo es una <b>línea</b> que predice la <b>altura de un árbol según su edad</b>. Los puntos llenos son los árboles que estudió y los huecos son árboles nuevos.</p></div></div>
+    <div class="reg-tres" id="regTres"></div>
+    <div class="leyenda" id="regLey" hidden><span><i style="width:10px;height:10px;border-radius:50%;background:var(--ink)"></i>Árboles que estudió</span><span><i style="width:10px;height:10px;border-radius:50%;border:2px solid var(--prueba)"></i>Árboles nuevos</span><span><i style="width:22px;height:3px;background:var(--pizarra)"></i>La línea del modelo</span></div>
+  </section>
+
+  <p class="puente">Ahora, <b>3 máquinas</b> aprenden igual, pero cada una con <b>fotos distintas</b>: una del parque, una de la costa y una del páramo.</p>
+
+  <section class="concepto sub" id="sesgo">
+    <div class="con-cab"><span class="con-num">3</span><div><h2>Sesgo</h2><p class="con-def">Se equivoca <b>siempre en lo mismo</b>, sin importar qué fotos estudió.</p></div></div>
+    <div class="con-grid">
+      <div class="con-lado">
+        <div class="diana-uno" id="d3"></div>
+        <p class="clave">Las 3 solo miran el color: <b>responden igual</b> y fallan en lo mismo. Pasa en el <b>subajuste</b>.</p>
+      </div>
+      <div class="tabla-maq" id="t3"></div>
+    </div>
+  </section>
+
+  <section class="concepto sobre" id="varianza">
+    <div class="con-cab"><span class="con-num">4</span><div><h2>Varianza</h2><p class="con-def">Sus respuestas <b>cambian</b> según las fotos que estudió.</p></div></div>
+    <div class="con-grid">
+      <div class="con-lado">
+        <div class="diana-uno" id="d4"></div>
+        <p class="clave">Cada una memorizó sus fotos: <b>responden distinto</b>. Pasa en el <b>sobreajuste</b>.</p>
+      </div>
+      <div class="tabla-maq" id="t4"></div>
+    </div>
+  </section>
+
+  <section class="concepto justo" id="detectar">
+    <div class="con-cab"><span class="con-num">5</span><div><h2>Cómo detectarlo</h2><p class="con-def">Compara <b>dos notas</b>: la del entrenamiento y la del examen.</p></div></div>
+    <div class="detector">
+      <div class="det-panel">
+        <div class="selector" role="group" aria-label="Elige un modelo">
+          <button type="button" data-m="sub" aria-pressed="true">Aprendió poco</button>
+          <button type="button" data-m="justo" aria-pressed="false">Aprendió bien</button>
+          <button type="button" data-m="sobre" aria-pressed="false">Memorizó</button>
+        </div>
+        <div class="notas2" id="nd"></div>
+        <div class="veredicto" id="veredicto"></div>
+      </div>
+      <div class="tabla-box">
+        <table>
+          <thead><tr><th>Entrenamiento</th><th>Examen</th><th>Diagnóstico</th></tr></thead>
+          <tbody>
+            <tr data-z="sub"><td>Mal</td><td>Mal</td><td><span class="pill" style="background:var(--sub)">Subajuste · sesgo</span></td></tr>
+            <tr data-z="justo"><td>Bien</td><td>Bien</td><td><span class="pill" style="background:var(--justo)">Buen ajuste</span></td></tr>
+            <tr data-z="sobre"><td>Perfecto</td><td>Mal</td><td><span class="pill" style="background:var(--sobre)">Sobreajuste · varianza</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="resumen" aria-label="Resumen">
+    <div class="res sub"><b>Subajuste</b><span>Aprendió muy poco.</span></div>
+    <div class="res sobre"><b>Sobreajuste</b><span>Memorizó.</span></div>
+    <div class="res sub"><b>Sesgo</b><span>Siempre falla en lo mismo.</span></div>
+    <div class="res sobre"><b>Varianza</b><span>Cambia según los datos.</span></div>
+  </section>
+
+  <footer class="pie"><svg viewBox="0 0 246.192 70.793" role="img" aria-label="Riwi"><g>
+<path fill="#6b5cff" transform="translate(-220.45 -21.27)" d="M465.319,56.584a11.032,11.032,0,0,0-4.333-3.681L441.006,42.878c-1.873-.9-3.034-1.043-3.878-.508s-1.224,1.677-1.224,3.7v1.289a7.583,7.583,0,0,0,.893,4.051,7.556,7.556,0,0,0,3.268,2.577l15.907,7.738c.068.031.125.06.174.088-.055.031-.12.063-.2.1l-15.879,7.724a7.574,7.574,0,0,0-3.271,2.579,7.586,7.586,0,0,0-.894,4.052v1.288c0,2.027.377,3.17,1.223,3.7a2.083,2.083,0,0,0,1.147.314,6.73,6.73,0,0,0,2.757-.831l19.985-10.029a10.944,10.944,0,0,0,4.3-3.666,9.719,9.719,0,0,0,1.323-5.234,9.718,9.718,0,0,0-1.323-5.234"/>
+<path fill="#6b5cff" transform="translate(-37.296)" d="M106.123,1.075C105.586.361,104.226,0,102.082,0h-1.735a7.949,7.949,0,0,0-4.625,1.048,8.463,8.463,0,0,0-2.45,4.157L74.333,65.5c-.693,2.08-.773,3.5-.234,4.214s1.9,1.076,4.04,1.076h1.429a7.949,7.949,0,0,0,4.625-1.048,8.417,8.417,0,0,0,2.451-4.056l19.244-60.5c.692-2.014.773-3.4.236-4.116"/>
+<path fill="#6b5cff" transform="translate(0 -21.272)" d="M29.516,42.375c-.858-.543-2.024-.388-3.9.518L5.628,52.922a10.937,10.937,0,0,0-4.3,3.666A9.717,9.717,0,0,0,0,61.822a9.723,9.723,0,0,0,1.323,5.234,11.029,11.029,0,0,0,4.333,3.68L25.637,80.763a6.6,6.6,0,0,0,2.728.816,2.111,2.111,0,0,0,1.15-.309c.847-.533,1.224-1.677,1.224-3.7V76.276a7.575,7.575,0,0,0-.893-4.05,7.546,7.546,0,0,0-3.268-2.577L10.671,61.911c-.068-.032-.125-.061-.174-.088.055-.03.12-.064.2-.1L26.574,54a7.579,7.579,0,0,0,3.271-2.578,7.587,7.587,0,0,0,.894-4.053V46.079c0-2.027-.377-3.17-1.223-3.7"/>
+<g style="fill:var(--ink)">
+<path transform="translate(-108.93 -17.961)" d="M222.632,35.515H220.8c-2.216,0-3.688.349-4.376,1.036s-1.037,2.161-1.037,4.376V80.322c0,2.217.349,3.689,1.036,4.375s2.159,1.038,4.377,1.038h1.827c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-197.176 -17.961)" d="M397.125,35.515H395.3c-2.215,0-3.688.349-4.376,1.036s-1.036,2.161-1.036,4.376V80.322c0,2.217.348,3.689,1.036,4.375s2.159,1.038,4.376,1.038h1.828c2.215,0,3.688-.349,4.376-1.037s1.037-2.16,1.037-4.375V40.928c0-2.214-.349-3.686-1.037-4.376s-2.162-1.036-4.376-1.036"/>
+<path transform="translate(-63.977 -3.538)" d="M148.672,47.043c8.9-2.275,13.349-8.8,13.349-19.48,0-13.745-7.318-20.568-21.854-20.568A1.749,1.749,0,0,0,138.5,8.209l-2.748,8.558a1.983,1.983,0,0,0,1.888,2.589h2.525c6.032,0,8.6,2.571,8.6,8.207,0,5.438-2.867,8.108-8.6,8.108h-8.378a2.884,2.884,0,0,0-2.746,2l-2.436,7.588a2.121,2.121,0,0,0,2.02,2.77h5.707L146.4,66.424c2.67,3.856,4.449,4.845,8.9,4.845h3.757c4.648,0,5.043-1.088,2.571-4.746Z"/>
+<path transform="translate(-130.426 -17.993)" d="M310.465,35.579H308.9a4.882,4.882,0,0,0-3.876,1.338c-.72.847-1.179,2.354-1.442,4.744l-2.7,28.532a8.3,8.3,0,0,1-.632,2.9.887.887,0,0,1-.815.357.922.922,0,0,1-.876-.388,7.838,7.838,0,0,1-.568-2.84l-2.278-24.49c-.353-3.7-1.216-6.249-2.637-7.795s-3.667-2.34-6.653-2.354v0h-.109v0c-2.986.014-5.226.805-6.653,2.354s-2.284,4.1-2.637,7.795l-2.278,24.49a7.838,7.838,0,0,1-.568,2.84.921.921,0,0,1-.876.388.887.887,0,0,1-.815-.357,8.3,8.3,0,0,1-.632-2.9l-2.7-28.532c-.263-2.39-.722-3.9-1.441-4.744a4.883,4.883,0,0,0-3.876-1.338h-1.565c-1.934,0-3.175.466-3.8,1.424-.573.886-.715,2.39-.45,4.733l3.13,30.072c.494,4.616,1.541,8.032,3.194,10.438,1.739,2.39,4.752,3.6,8.953,3.6,3.494,0,6.093-1.138,7.723-3.383,1.576-2.169,2.558-5.659,3-10.67l1.848-20.072h.985L288.709,71.8c.445,5.011,1.427,8.5,3,10.67,1.63,2.244,4.228,3.383,7.723,3.383,4.2,0,7.214-1.212,8.953-3.6,1.654-2.406,2.7-5.822,3.194-10.438l3.13-30.072c.266-2.343.123-3.847-.45-4.733-.622-.958-1.864-1.424-3.8-1.424"/>
+<path transform="translate(-197.763)" d="M400.581,0h-1.735a7.953,7.953,0,0,0-4.625,1.048,8.467,8.467,0,0,0-2.45,4.157l-.622,1.981a2.266,2.266,0,0,0,2.162,2.945h7.846a2.266,2.266,0,0,0,2.159-1.58l1.069-3.361c.693-2.014.773-3.4.236-4.116S402.725,0,400.581,0"/>
+</g></g></svg><span>Material de clase · Machine Learning desde cero · ejemplo ilustrativo</span></footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  function mulberry32(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function gauss(r) { var u = 0; while (!u) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r()); }
+  function fmt(n, d) { return (Math.round(n * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d).replace(".", ","); }
+  var $ = function (id) { return document.getElementById(id); };
+  function A(n, o) { o.n = n; o.arbol = 1; o.tronco = 1; o.copa = 1; if (o.alto == null) o.alto = 1; if (o.verde == null) o.verde = 1; if (!o.hojas) o.hojas = "verdes"; if (!o.ctronco) o.ctronco = "café"; return o; }
+  function N(n, o) { o.n = n; o.arbol = 0; return o; }
+  var C = {
+    roble: A("Roble", { forma: "redonda", ramas: 5, fondo: "pasto", altura: 15 }),
+    pino: A("Pino", { forma: "pino", ramas: 6, fondo: "pasto", altura: 20 }),
+    mango: A("Mango", { forma: "redonda", ramas: 4, fondo: "pasto", altura: 10 }),
+    ceiba: A("Ceiba", { forma: "redonda", ramas: 7, fondo: "pasto", altura: 30, ancha: 1 }),
+    palmaCera: A("Palma de cera", { forma: "abanico", ctronco: "gris", ramas: 0, fondo: "montaña", altura: 45 }),
+    guayacan: A("Guayacán", { forma: "redonda", hojas: "amarillas", ramas: 5, fondo: "pasto", altura: 12 }),
+    pinoMontana: A("Pino de montaña", { forma: "pino", ramas: 5, fondo: "montaña", altura: 18 }),
+    almendro: A("Almendro de la calle", { forma: "redonda", ramas: 5, fondo: "calle", altura: 8 }),
+    otonoParque: A("Árbol del parque en otoño", { verde: 0, forma: "redonda", hojas: "naranjas", ramas: 6, fondo: "pasto", altura: 11 }),
+    pinoParamo: A("Pino del páramo", { forma: "pino", ramas: 6, fondo: "nieve", altura: 12, nieve: 1 }),
+    cocotero: A("Cocotero", { forma: "abanico", ramas: 0, fondo: "playa", altura: 14 }),
+    abedulJoven: A("Abedul joven", { forma: "ovalada", ctronco: "blanco", ramas: 4, fondo: "pasto", altura: 13 }),
+    arbusto: N("Arbusto", { verde: 1, tronco: 0, copa: 1, alto: 0, forma: "redonda", hojas: "verdes", ctronco: "ninguno", ramas: 0, fondo: "pasto", altura: 1, tipo: "arbusto" }),
+    casa: N("Casa", { verde: 0, tronco: 0, copa: 0, alto: 1, forma: "ninguna", hojas: "ninguna", ctronco: "ninguno", ramas: 0, fondo: "pasto", altura: 6, tipo: "casa" }),
+    perro: N("Perro", { verde: 0, tronco: 0, copa: 0, alto: 0, forma: "ninguna", hojas: "ninguna", ctronco: "ninguno", ramas: 0, fondo: "pasto", altura: 0.6, tipo: "perro" }),
+    pasto: N("Pasto", { verde: 1, tronco: 0, copa: 0, alto: 0, forma: "ninguna", hojas: "verdes", ctronco: "ninguno", ramas: 0, fondo: "pasto", altura: 0.2, tipo: "pasto" }),
+    otono: A("Árbol en otoño", { verde: 0, forma: "redonda", hojas: "naranjas", ramas: 5, fondo: "pasto", altura: 12 }),
+    invierno: A("Árbol en invierno", { verde: 0, forma: "ramas", hojas: "ninguna", ramas: 6, fondo: "nieve", altura: 10 }),
+    palmera: A("Palmera", { forma: "abanico", ramas: 0, fondo: "playa", altura: 12 }),
+    abedul: A("Abedul", { forma: "ovalada", ctronco: "blanco", ramas: 4, fondo: "pasto", altura: 15 }),
+    pinoNieve: A("Pino en la nieve", { forma: "pino", ramas: 6, fondo: "nieve", altura: 14, nieve: 1 }),
+    mangoCalle: A("Mango en la calle", { forma: "redonda", ramas: 5, fondo: "calle", altura: 9 }),
+    navidad: A("Árbol de navidad", { forma: "pino", ramas: 6, fondo: "casa", altura: 2, navidad: 1 }),
+    bonsai: A("Bonsái", { alto: 0, forma: "redonda", ramas: 3, fondo: "maceta", altura: 0.4 }),
+    cactus: N("Cactus", { verde: 1, tronco: 0, copa: 0, alto: 1, forma: "ninguna", hojas: "ninguna", ctronco: "ninguno", ramas: 2, fondo: "playa", altura: 3, tipo: "cactus" }),
+    brocoli: N("Brócoli", { verde: 1, tronco: 1, copa: 1, alto: 0, forma: "redonda", hojas: "verdes", ctronco: "verde", ramas: 6, fondo: "plato", altura: 0.15, tipo: "brocoli" }),
+    poste: N("Poste de luz", { verde: 0, tronco: 1, copa: 0, alto: 1, forma: "ninguna", hojas: "ninguna", ctronco: "gris", ramas: 1, fondo: "calle", altura: 7, tipo: "poste" }),
+    rana: N("Rana", { verde: 1, tronco: 0, copa: 0, alto: 0, forma: "ninguna", hojas: "ninguna", ctronco: "ninguno", ramas: 0, fondo: "agua", altura: 0.1, tipo: "rana" }),
+    seto: N("Seto", { verde: 1, tronco: 0, copa: 1, alto: 0, forma: "redonda", hojas: "verdes", ctronco: "ninguno", ramas: 0, fondo: "calle", altura: 1.2, tipo: "seto" })
+  };
+  var NEG = ["arbusto", "casa", "perro", "pasto"];
+  var ALBUM = ["roble", "pino", "mango", "ceiba"], EXTRA = ["palmaCera", "guayacan"];
+  var EXAMEN = ["otono", "invierno", "palmera", "abedul", "pinoNieve", "mangoCalle", "navidad", "bonsai", "cactus", "brocoli", "poste", "rana", "seto"];
+  var MAQUINAS = [
+    { n: "Parque en otoño", fotos: ["roble", "otonoParque"] },
+    { n: "Páramo", fotos: ["pino", "pinoParamo"] },
+    { n: "Costa", fotos: ["cocotero", "mango"] },
+    { n: "Ciudad", fotos: ["almendro", "mango"] },
+    { n: "Bosque de abedules", fotos: ["abedulJoven", "roble"] }
+  ];
+
+  var NIVELES = [
+    { n: "Solo mira el color", f: ["verde"] },
+    { n: "Color y tronco", f: ["verde", "tronco"] },
+    { n: "Lo esencial de un árbol", f: ["tronco", "copa", "alto"] },
+    { n: "+ la forma de la copa", f: ["tronco", "copa", "alto", "forma"] },
+    { n: "+ los colores exactos", f: ["tronco", "copa", "alto", "forma", "hojas", "ctronco"] },
+    { n: "Memoriza todo de sus fotos", f: ["tronco", "copa", "alto", "forma", "hojas", "ctronco", "ramas", "fondo", "altura"] }
+  ];
+  var ESENCIAL = { tronco: 1, copa: 1, alto: 1 };
+  var NUM = { ramas: 1, altura: 1 };
+  var NOMBRE_VAL = {
+    forma: { redonda: "redonda", pino: "de pino", abanico: "en abanico", ramas: "de ramas sin hojas", ovalada: "ovalada" },
+    fondo: { pasto: "un parque con pasto", "montaña": "la montaña", nieve: "la nieve", playa: "la playa", calle: "la calle", casa: "una casa", maceta: "una maceta", plato: "un plato", agua: "el agua" }
+  };
+  function lista(arr) { return arr.length === 1 ? arr[0] : arr.slice(0, -1).join(", ") + " o " + arr[arr.length - 1]; }
+  function aprender(fotos, nivel) {
+    var pos = fotos.map(function (k) { return C[k]; }).filter(function (o) { return o.arbol; });
+    return NIVELES[nivel - 1].f.map(function (k) {
+      if (NUM[k]) { var v = pos.map(function (o) { return o[k]; }); return { k: k, min: Math.min.apply(null, v), max: Math.max.apply(null, v) }; }
+      if (k === "verde") { var si = pos.filter(function (o) { return o.verde; }).length; return { k: k, vals: [si * 2 >= pos.length ? 1 : 0] }; }
+      var s = []; pos.forEach(function (o) { if (s.indexOf(o[k]) < 0) s.push(o[k]); }); return { k: k, vals: s };
+    });
+  }
+  function cumple(r, o) { return NUM[r.k] ? o[r.k] >= r.min && o[r.k] <= r.max : r.vals.indexOf(o[r.k]) >= 0; }
+  function predecir(reglas, o) { for (var i = 0; i < reglas.length; i++) if (!cumple(reglas[i], o)) return { si: 0, falla: reglas[i] }; return { si: 1, falla: null }; }
+  function textoRegla(r) {
+    switch (r.k) {
+      case "verde": return r.vals.length > 1 ? "Puede ser de cualquier color" : r.vals[0] ? "Es verde" : "No es verde";
+      case "tronco": return "Tiene tronco";
+      case "copa": return "Tiene copa: hojas o ramas arriba del tronco";
+      case "alto": return "Es más alto que una persona";
+      case "forma": return "Su copa es " + lista(r.vals.map(function (v) { return NOMBRE_VAL.forma[v]; }));
+      case "hojas": return "Sus hojas son " + lista(r.vals.map(function (v) { return v === "ninguna" ? "ninguna" : v; }));
+      case "ctronco": return "Su tronco es " + lista(r.vals);
+      case "ramas": return r.min === r.max ? "Tiene exactamente " + r.min + " ramas grandes" : "Tiene entre " + r.min + " y " + r.max + " ramas grandes";
+      case "fondo": return "Está en " + lista(r.vals.map(function (v) { return NOMBRE_VAL.fondo[v]; }));
+      case "altura": return "Mide entre " + fmt(r.min, 0) + " y " + fmt(r.max, 0) + " metros";
+    }
+  }
+
+  var FONDO = { pasto: "#86B85F", nieve: "#F4F7FB", playa: "#E9D6A4", calle: "#9AA0A8", "montaña": "#8DB36A", casa: "#C9A27A", agua: "#86BFD6", maceta: "#F1ECE2", plato: "#F1ECE2" };
+  var HOJA = { verdes: "#4E9A4A", amarillas: "#E7C23B", naranjas: "#E08A3C" };
+  var TRONCO = { "café": "#7A5232", gris: "#A3A39A", blanco: "#F2F0EA" };
+  function dibujo(o) {
+    var s = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">';
+    var cielo = o.fondo === "casa" ? "#F3E7D7" : o.fondo === "nieve" ? "#DDE7F2" : "#E4EEF8";
+    s += '<rect width="100" height="100" fill="' + cielo + '"/>';
+    if (o.fondo === "montaña") s += '<path d="M0 82 L26 46 L44 66 L66 34 L100 76 L100 82 Z" fill="#B9C8B4"/>';
+    if (o.fondo === "casa") s += '<rect x="66" y="22" width="22" height="20" fill="#CFE3F2" stroke="#B8946A" stroke-width="2"/>';
+    var g = FONDO[o.fondo];
+    if (o.fondo === "maceta" || o.fondo === "plato") s += '<rect y="84" width="100" height="16" fill="#D9CBB4"/>';
+    else s += '<rect y="82" width="100" height="18" fill="' + g + '"/>';
+    if (o.fondo === "calle") s += '<path d="M6 92 H24 M38 92 H56 M70 92 H88" stroke="#F4F4F4" stroke-width="2"/>';
+    if (o.fondo === "nieve") s += '<rect y="82" width="100" height="18" fill="none" stroke="#D3DCE6"/>';
+    if (o.tipo) return s + objeto(o) + "</svg>";
+    var h = o.fondo === "maceta" ? 34 : Math.max(36, Math.min(74, 34 + 11 * Math.log(o.altura + 1)));
+    var base = o.fondo === "maceta" ? 70 : 84, x = 50;
+    if (o.fondo === "maceta") s += '<path d="M36 70 H64 L60 86 H40 Z" fill="#B5643C"/>';
+    var palma = o.forma === "abanico", th = h * (palma ? 0.8 : o.forma === "pino" ? 0.22 : 0.45), tw = palma ? 4 : Math.max(3, h * (o.ancha ? 0.16 : 0.1));
+    var tc = TRONCO[o.ctronco] || "#7A5232", top = base - th, hc = HOJA[o.hojas] || "#4E9A4A";
+    s += '<rect x="' + (x - tw / 2) + '" y="' + top + '" width="' + tw + '" height="' + (th + 1) + '" fill="' + tc + '" stroke="rgba(0,0,0,.25)" stroke-width=".6"/>';
+    if (o.ctronco === "blanco") s += '<path d="M' + (x - 2) + " " + (top + 8) + " h3 M" + (x) + " " + (top + 16) + " h3 M" + (x - 2) + " " + (top + 24) + ' h3" stroke="#333" stroke-width="1.2"/>';
+    var copaH = h - th;
+    if (o.forma === "redonda") {
+      var r = copaH * 0.42 * (o.ancha ? 1.25 : 1);
+      s += '<circle cx="' + (x - r * 0.62) + '" cy="' + (top - r * 0.45) + '" r="' + (r * 0.72) + '" fill="' + hc + '"/><circle cx="' + (x + r * 0.62) + '" cy="' + (top - r * 0.45) + '" r="' + (r * 0.72) + '" fill="' + hc + '"/><circle cx="' + x + '" cy="' + (top - r * 0.9) + '" r="' + r + '" fill="' + hc + '"/>';
+      s += '<circle cx="' + (x + r * 0.3) + '" cy="' + (top - r * 1.15) + '" r="' + (r * 0.3) + '" fill="#fff" opacity=".16"/>';
+      if (o.hojas === "naranjas") s += '<path d="M24 74 l3 2 M70 70 l3 -2 M78 78 l2 2" stroke="#E08A3C" stroke-width="2.4" stroke-linecap="round"/>';
+      if (o.hojas === "amarillas") s += '<circle cx="' + (x - r * 0.5) + '" cy="' + (top - r) + '" r="2" fill="#F6E07A"/><circle cx="' + (x + r * 0.4) + '" cy="' + (top - r * 0.5) + '" r="2" fill="#F6E07A"/>';
+    } else if (o.forma === "pino") {
+      var w = copaH * 0.62, pc = "#2F7A45";
+      for (var k = 0; k < 3; k++) { var y0 = top - k * copaH * 0.28, ww = w * (1 - k * 0.24); s += '<path d="M' + (x - ww) + " " + y0 + " L" + x + " " + (y0 - copaH * 0.48) + " L" + (x + ww) + " " + y0 + ' Z" fill="' + pc + '"/>'; if (o.nieve) s += '<path d="M' + (x - ww * 0.42) + " " + (y0 - copaH * 0.28) + " L" + x + " " + (y0 - copaH * 0.48) + " L" + (x + ww * 0.42) + " " + (y0 - copaH * 0.28) + ' Z" fill="#fff"/>'; }
+      if (o.navidad) { [[x - 8, top - 6, "#D9503B"], [x + 7, top - 12, "#E7C23B"], [x - 3, top - 22, "#4C8FD6"], [x + 4, top - 30, "#D9503B"]].forEach(function (b) { s += '<circle cx="' + b[0] + '" cy="' + b[1] + '" r="2.4" fill="' + b[2] + '"/>'; }); s += '<path d="M' + x + " " + (top - copaH * 1.06 - 4) + ' l2 4 4 .5 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -.5 z" fill="#E7C23B"/>'; }
+    } else if (o.forma === "ovalada") {
+      s += '<ellipse cx="' + x + '" cy="' + (top - copaH * 0.42) + '" rx="' + copaH * 0.3 + '" ry="' + copaH * 0.52 + '" fill="' + hc + '"/>';
+    } else if (o.forma === "abanico") {
+      for (var a = -150; a <= -30; a += 24) { var rad = a * Math.PI / 180, L = 20; s += '<path d="M' + x + " " + top + " Q" + (x + Math.cos(rad) * L * 0.6) + " " + (top + Math.sin(rad) * L * 0.9) + " " + (x + Math.cos(rad) * L) + " " + (top + Math.sin(rad) * L * 0.55 + 9) + '" fill="none" stroke="#3E8A45" stroke-width="5" stroke-linecap="round"/>'; }
+      if (o.fondo === "playa") s += '<circle cx="' + (x + 2) + '" cy="' + (top + 3) + '" r="2.6" fill="#7A5232"/><circle cx="' + (x - 3) + '" cy="' + (top + 4) + '" r="2.6" fill="#7A5232"/>';
+    } else if (o.forma === "ramas") {
+      s += '<path d="M' + x + " " + top + " L" + (x - 18) + " " + (top - 22) + " M" + x + " " + top + " L" + (x + 16) + " " + (top - 26) + " M" + x + " " + (top + 4) + " L" + (x - 2) + " " + (top - 32) + " M" + (x - 10) + " " + (top - 12) + " L" + (x - 22) + " " + (top - 14) + " M" + (x + 9) + " " + (top - 14) + " L" + (x + 20) + " " + (top - 12) + '" stroke="' + tc + '" stroke-width="3" stroke-linecap="round" fill="none"/>';
+      s += '<path d="M' + (x - 20) + " " + (top - 23) + " l4 0 M" + (x + 14) + " " + (top - 27) + ' l4 0" stroke="#fff" stroke-width="2"/>';
+    }
+    return s + "</svg>";
+  }
+  function objeto(o) {
+    switch (o.tipo) {
+      case "arbusto": return '<ellipse cx="50" cy="74" rx="26" ry="14" fill="#4E9A4A"/><ellipse cx="40" cy="70" rx="12" ry="9" fill="#5BAA55"/>';
+      case "seto": return '<rect x="14" y="62" width="72" height="22" rx="9" fill="#4E9A4A"/><path d="M20 70 h60" stroke="#5BAA55" stroke-width="4"/>';
+      case "casa": return '<rect x="28" y="50" width="44" height="34" fill="#E9DCC8" stroke="#8A6A4A"/><path d="M22 52 L50 30 L78 52 Z" fill="#B5643C"/><rect x="45" y="66" width="10" height="18" fill="#7A5232"/><rect x="33" y="58" width="8" height="8" fill="#CFE3F2"/>';
+      case "perro": return '<ellipse cx="48" cy="70" rx="18" ry="9" fill="#A8743F"/><circle cx="68" cy="61" r="8" fill="#A8743F"/><ellipse cx="72" cy="57" rx="3" ry="6" fill="#7A5232"/><circle cx="70" cy="60" r="1.3" fill="#222"/><path d="M36 76 v8 M44 77 v8 M54 77 v8 M60 76 v8" stroke="#7A5232" stroke-width="3"/><path d="M30 68 q-8 -8 -6 -14" stroke="#A8743F" stroke-width="3" fill="none"/>';
+      case "pasto": var p = ""; for (var i = 8; i < 96; i += 6) p += '<path d="M' + i + " 84 q" + (i % 12 ? 3 : -3) + " -14 " + (i % 12 ? 6 : -2) + ' -22" stroke="#4E9A4A" stroke-width="2.4" fill="none"/>'; return p;
+      case "cactus": return '<rect x="44" y="34" width="12" height="50" rx="6" fill="#5A9A50"/><path d="M44 58 h-8 v-12" stroke="#5A9A50" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M56 52 h8 v-10" stroke="#5A9A50" stroke-width="8" stroke-linecap="round" fill="none"/>';
+      case "brocoli": return '<ellipse cx="50" cy="86" rx="32" ry="6" fill="#fff" stroke="#C9BCA6"/><rect x="47" y="70" width="6" height="15" fill="#9BC27A"/><circle cx="42" cy="66" r="7" fill="#3F7F3A"/><circle cx="58" cy="66" r="7" fill="#3F7F3A"/><circle cx="50" cy="60" r="8" fill="#4E9A4A"/>';
+      case "poste": return '<rect x="47" y="18" width="5" height="66" fill="#6F757D"/><path d="M50 20 h14" stroke="#6F757D" stroke-width="3"/><path d="M60 20 h10 l-2 6 h-6 z" fill="#E7C23B"/>';
+      case "rana": return '<ellipse cx="50" cy="86" rx="22" ry="5" fill="#4E9A4A"/><ellipse cx="50" cy="76" rx="14" ry="9" fill="#5BAA55"/><circle cx="43" cy="67" r="4.5" fill="#5BAA55"/><circle cx="57" cy="67" r="4.5" fill="#5BAA55"/><circle cx="43" cy="66" r="2" fill="#222"/><circle cx="57" cy="66" r="2" fill="#222"/>';
+    }
+    return "";
+  }
+
+
+  var FOTOS = ["roble", "pino", "mango", "arbusto", "casa", "perro"];
+  var EX = ["otono", "palmera", "pinoNieve", "cactus", "brocoli", "rana"];
+  var MODELOS = { sub: ["verde"], justo: ["tronco", "copa", "alto"], sobre: ["tronco", "copa", "hojas", "forma", "fondo"] };
+  var MAQ = [{ n: "Parque", fotos: ["roble", "mango"] }, { n: "Costa", fotos: ["cocotero", "mango"] }, { n: "Páramo", fotos: ["pino", "pinoParamo"] }];
+  function aprenderF(fotos, feats) {
+    var pos = fotos.map(function (k) { return C[k]; }).filter(function (o) { return o.arbol; });
+    return feats.map(function (k) {
+      if (k === "verde") return { k: k, vals: [1] };
+      var s = []; pos.forEach(function (o) { if (s.indexOf(o[k]) < 0) s.push(o[k]); }); return { k: k, vals: s };
+    });
+  }
+  function nota(reg, lista_) { var ok = 0; lista_.forEach(function (k) { if (predecir(reg, C[k]).si === C[k].arbol) ok++; }); return ok; }
+  function foto(k, reg) {
+    var o = C[k], cap = "<b>" + o.n + "</b>";
+    if (!reg) return '<figure class="foto neutra">' + dibujo(o) + "<figcaption>" + cap + '<span class="real ' + (o.arbol ? "si" : "no") + '">' + (o.arbol ? "Es árbol" : "No es árbol") + "</span></figcaption></figure>";
+    var p = predecir(reg, o), ok = p.si === o.arbol;
+    return '<figure class="foto ' + (ok ? "ok" : "mal") + '">' + dibujo(o) + "<figcaption>" + cap + '<span class="dijo"><i class="lg ' + (ok ? "ok" : "mal") + '"></i>Dijo: ' + (p.si ? "árbol" : "no") + "</span></figcaption></figure>";
+  }
+  function notas(reg) {
+    var a = nota(reg, FOTOS), b = nota(reg, EX);
+    return '<div class="err-fila"><span>Entrenamiento</span><span class="b"><i style="width:' + (a / FOTOS.length * 100) + '%;background:var(--ink)"></i></span><span class="v">' + a + " de " + FOTOS.length + "</span></div>" +
+      '<div class="err-fila"><span>Examen</span><span class="b"><i style="width:' + (b / EX.length * 100) + '%;background:var(--prueba)"></i></span><span class="v">' + b + " de " + EX.length + "</span></div>";
+  }
+  function tablaMaq(feats) {
+    var h = '<div class="tm-fila tm-cab"><span></span>' + EX.map(function (k) { return '<span class="tm-ico" title="' + C[k].n + '">' + dibujo(C[k]) + "</span>"; }).join("") + "</div>";
+    MAQ.forEach(function (m) {
+      var reg = aprenderF(m.fotos.concat(["arbusto", "casa", "perro"]), feats);
+      h += '<div class="tm-fila"><span class="tm-nom"><b>' + m.n + '</b><span class="tm-fotos">' + m.fotos.map(function (k) { return dibujo(C[k]); }).join("") + "</span></span>" +
+        EX.map(function (k) { var p = predecir(reg, C[k]).si, ok = p === C[k].arbol; return '<span class="tm-c ' + (ok ? "ok" : "mal") + '">' + (p ? "árbol" : "no") + "</span>"; }).join("") + "</div>";
+    });
+    h += '<div class="tm-fila tm-real"><span class="tm-nom"><b>Correcto</b></span>' + EX.map(function (k) { return '<span class="tm-c">' + (C[k].arbol ? "árbol" : "no") + "</span>"; }).join("") + "</div>";
+    return h + '<p class="tm-ley"><span class="tm-c mal mini">no</span> = se equivocó</p>';
+  }
+  function diana(dx, dy, sd, titulo, sub) {
+    var r = mulberry32(dx * 7 + sd * 3 + 11), s = '<svg viewBox="0 0 100 100" aria-hidden="true">';
+    [46, 32, 18, 6].forEach(function (rad, i) { s += '<circle cx="50" cy="50" r="' + rad + '" style="fill:' + (i % 2 ? "var(--surface)" : "var(--surface-2)") + ';stroke:var(--line)"/>'; });
+    s += '<circle cx="50" cy="50" r="3" style="fill:var(--ink)"/>';
+    for (var k = 0; k < 10; k++) s += '<circle cx="' + Math.max(6, Math.min(94, 50 + dx + gauss(r) * sd)).toFixed(1) + '" cy="' + Math.max(6, Math.min(94, 50 + dy + gauss(r) * sd)).toFixed(1) + '" r="3.6" style="fill:var(--pizarra);stroke:var(--surface)" stroke-width="1"/>';
+    return s + "</svg><div><b>" + titulo + "</b><span>" + sub + "</span></div>";
+  }
+  var R = { sub: aprenderF(FOTOS, MODELOS.sub), justo: aprenderF(FOTOS, MODELOS.justo), sobre: aprenderF(FOTOS, MODELOS.sobre) };
+  $("album").innerHTML = FOTOS.map(function (k) { return foto(k); }).join("");
+  $("examen0").innerHTML = EX.map(function (k) { return foto(k); }).join("");
+  $("n1").innerHTML = notas(R.sub); $("e1").innerHTML = EX.map(function (k) { return foto(k, R.sub); }).join("");
+  $("r2").innerHTML = R.sobre.map(function (r) { return "<li>" + textoRegla(r) + "</li>"; }).join("");
+  $("n2").innerHTML = notas(R.sobre); $("e2").innerHTML = EX.map(function (k) { return foto(k, R.sobre); }).join("");
+  $("n3").innerHTML = notas(R.justo); $("e3").innerHTML = EX.map(function (k) { return foto(k, R.justo); }).join("");
+  $("t3").innerHTML = tablaMaq(MODELOS.sub); $("t4").innerHTML = tablaMaq(MODELOS.sobre);
+  $("d3").innerHTML = diana(22, -18, 3.5, "Alto sesgo", "Dardos juntos, pero lejos del centro.");
+  $("d4").innerHTML = diana(0, 0, 16, "Alta varianza", "Dardos alrededor del centro, pero dispersos.");
+  var V = { sub: "Falla en las dos notas → <b>subajuste</b> (alto sesgo).", justo: "Bien en las dos notas → <b>buen ajuste</b>.", sobre: "Perfecto en entrenamiento y mal en el examen → <b>sobreajuste</b> (alta varianza)." };
+  var NOM = { sub: "Subajuste", justo: "Buen ajuste", sobre: "Sobreajuste" };
+  function detector(z) {
+    document.querySelectorAll(".selector button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.m === z ? "true" : "false"); });
+    $("nd").innerHTML = notas(R[z]);
+    $("veredicto").className = "veredicto " + z; $("veredicto").innerHTML = '<span class="pill" style="background:var(--' + z + ')">' + NOM[z] + "</span><p>" + V[z] + "</p>";
+    document.querySelectorAll("tr[data-z]").forEach(function (tr) { tr.classList.toggle("on", tr.dataset.z === z); });
+  }
+  document.querySelectorAll(".selector button").forEach(function (b) { b.addEventListener("click", function () { detector(b.dataset.m); }); });
+  detector("sub");
+
+  (function () {
+    var X0r = 0, X1r = 60, YM = 32;
+    function realR(t) { return 26 / (1 + Math.exp(-(t - 13) / 4.2)) + 0.5; }
+    function base(x, d) { var u = 2 * (x - X0r) / (X1r - X0r) - 1, t = [1, u]; for (var k = 2; k <= d; k++) t.push(2 * u * t[k - 1] - t[k - 2]); return t.slice(0, d + 1); }
+    function ajustar(pts, d) {
+      var n = d + 1, A = [], i, j, c, r;
+      for (i = 0; i < n; i++) A.push(new Array(n + 1).fill(0));
+      pts.forEach(function (p) { var t = base(p[0], d); for (i = 0; i < n; i++) { for (j = 0; j < n; j++) A[i][j] += t[i] * t[j]; A[i][n] += t[i] * p[1]; } });
+      for (i = 0; i < n; i++) A[i][i] += 1e-6;
+      for (c = 0; c < n; c++) { var mx = c; for (r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[mx][c])) mx = r; var tmp = A[c]; A[c] = A[mx]; A[mx] = tmp; for (r = 0; r < n; r++) { if (r === c) continue; var k = A[r][c] / A[c][c]; for (j = c; j <= n; j++) A[r][j] -= k * A[c][j]; } }
+      var w = A.map(function (row, i) { return row[n] / row[i]; });
+      return function (x) { var t = base(x, d), s = 0; for (var i = 0; i < t.length; i++) s += t[i] * w[i]; return s; };
+    }
+    var rr = mulberry32(7), ent = [], nue = [];
+    for (var i = 0; i < 12; i++) { var x = 1.5 + (i + 0.15 + rr() * 0.7) * 57 / 12; ent.push([x, Math.max(0.2, realR(x) + gauss(rr) * 1.8)]); }
+    var rp = mulberry32(999); for (i = 0; i < 24; i++) { var x2 = 1.5 + rp() * 57; nue.push([x2, Math.max(0.2, realR(x2) + gauss(rp) * 1.8)]); }
+    function rmse(f, p) { var s = 0; p.forEach(function (q) { s += Math.pow(q[1] - f(q[0]), 2); }); return Math.sqrt(s / p.length); }
+    var casos = [
+      { d: 1, z: "sub", t: "Subajuste", s: "Una recta para un crecimiento que se frena: no sigue la forma." },
+      { d: 4, z: "justo", t: "Buen ajuste", s: "Una curva suave: crece rápido y luego se frena, como un árbol real." },
+      { d: 11, z: "sobre", t: "Sobreajuste", s: "Una curva que se retuerce para tocar cada árbol que estudió." }
+    ];
+    var W = 240, H = 172, l = 30, rgt = 232, top = 8, bot = 146;
+    function px(x) { return l + (x - X0r) / (X1r - X0r) * (rgt - l); }
+    function py(y) { return bot - Math.max(-6, Math.min(YM + 6, y)) / YM * (bot - top); }
+    $("regTres").innerHTML = casos.map(function (c) {
+      var f = ajustar(ent, c.d), d = "";
+      for (var k = 0; k <= 160; k++) { var xx = X0r + (X1r - X0r) * k / 160; d += (k ? "L" : "M") + px(xx).toFixed(1) + "," + py(f(xx)).toFixed(1); }
+      var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + c.t + ': altura del árbol según su edad"><defs><clipPath id="cr' + c.d + '"><rect x="' + l + '" y="' + top + '" width="' + (rgt - l) + '" height="' + (bot - top) + '"/></clipPath></defs>';
+      s += '<rect x="' + l + '" y="' + top + '" width="' + (rgt - l) + '" height="' + (bot - top) + '" style="fill:var(--' + c.z + '-bg)" rx="4"/>';
+      [0, 10, 20, 30].forEach(function (v) { s += '<text x="' + (l - 4) + '" y="' + (py(v) + 3) + '" text-anchor="end" style="font:9px var(--f-data);fill:var(--ink-soft)">' + v + "</text>"; });
+      [0, 20, 40, 60].forEach(function (v) { s += '<text x="' + px(v) + '" y="' + (bot + 11) + '" text-anchor="middle" style="font:9px var(--f-data);fill:var(--ink-soft)">' + v + "</text>"; });
+      s += '<text x="' + ((l + rgt) / 2) + '" y="' + (H - 2) + '" text-anchor="middle" style="font:500 10px var(--f-body);fill:var(--ink)">Edad (años)</text>';
+      s += '<text transform="translate(9 ' + ((top + bot) / 2) + ') rotate(-90)" text-anchor="middle" style="font:500 10px var(--f-body);fill:var(--ink)">Altura (m)</text>';
+      nue.forEach(function (p) { s += '<circle cx="' + px(p[0]).toFixed(1) + '" cy="' + py(p[1]).toFixed(1) + '" r="2.8" style="fill:var(--surface);stroke:var(--prueba)" stroke-width="1.4"/>'; });
+      s += '<path d="' + d + '" clip-path="url(#cr' + c.d + ')" style="fill:none;stroke:var(--pizarra)" stroke-width="2.6"/>';
+      ent.forEach(function (p) { s += '<circle cx="' + px(p[0]).toFixed(1) + '" cy="' + py(p[1]).toFixed(1) + '" r="3.6" style="fill:var(--ink);stroke:var(--surface)" stroke-width="1.2"/>'; });
+      s += "</svg>";
+      var et = rmse(f, ent), en = rmse(f, nue);
+      return '<figure class="reg-caso ' + c.z + '">' + s + '<figcaption><span class="chip-estado" style="background:var(--' + c.z + ')">' + c.t + "</span><span>" + c.s + '</span><span class="reg-err">Error con lo que estudió <b>' + fmt(et, 1) + " m</b> · con árboles nuevos <b>" + (en > 99 ? "> 99" : fmt(en, 1)) + " m</b></span></figcaption></figure>";
+    }).join("");
+    $("regLey").hidden = false;
+  })();
+})();
+</script>
+</body></html>

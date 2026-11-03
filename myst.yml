@@ -1,0 +1,123 @@
+version: 1
+
+project:
+  title: Ruta de Inteligencia Artificial
+  description: Plataforma de aprendizaje de Machine Learning, Deep Learning e IA Generativa basada en Jupyter Notebooks.
+  keywords: [machine learning, deep learning, ia generativa, jupyter, python]
+  authors:
+    - name: Bryan Yama Cruz
+      github: bsycruz
+      url: https://github.com/bryansycruz?tab=repositories
+  github: https://github.com/bsycruz/riwi_IA
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  plugins:
+    - _extensions/recursos_clase.mjs
+  exclude:
+    - README.md
+    - CONTRIBUTING.md
+    - LICENSE.md
+    - _plantillas/**
+  toc:
+    - file: index.md
+
+    - file: 01_machine_learning/index.md
+      children:
+
+        - file: 01_machine_learning/mod_01_base_analitica/index.md
+          children:
+            - file: 01_machine_learning/mod_01_base_analitica/cap_01_estructura_de_datos/index.md
+              children:
+                - file: 01_machine_learning/mod_01_base_analitica/cap_01_estructura_de_datos/codigo_de_la_sesion.md
+                - file: 01_machine_learning/mod_01_base_analitica/cap_01_estructura_de_datos/actividades_a_presentar.md
+
+            - file: 01_machine_learning/mod_01_base_analitica/cap_02_que_es_un_modelo/index.md
+
+            - file: 01_machine_learning/mod_01_base_analitica/cap_03_librerias_importantes/index.md
+
+            - file: 01_machine_learning/mod_01_base_analitica/cap_04_sesgo_y_varianza/index.md
+
+            # - file: 01_machine_learning/mod_01_base_analitica/cap_05_diagnostico_visual/index.md
+
+            # - file: 01_machine_learning/mod_01_base_analitica/cap_06_feature_engineering/index.md
+
+        # - file: 01_machine_learning/mod_02_motor_de_ajuste/index.md
+        #   children:
+        #     - file: 01_machine_learning/mod_02_motor_de_ajuste/cap_01_funcion_de_perdida/index.md
+        #     - file: 01_machine_learning/mod_02_motor_de_ajuste/cap_02_descenso_gradiente/index.md
+        #     - file: 01_machine_learning/mod_02_motor_de_ajuste/cap_03_validacion_sesgo_varianza/index.md
+
+        # - file: 01_machine_learning/mod_03_paradigmas_ml/index.md
+        #   children:
+        #     - file: 01_machine_learning/mod_03_paradigmas_ml/cap_01_supervisado/index.md
+        #     - file: 01_machine_learning/mod_03_paradigmas_ml/cap_02_no_supervisado/index.md
+        #     - file: 01_machine_learning/mod_03_paradigmas_ml/cap_03_refuerzo/index.md
+
+        # - file: 01_machine_learning/mod_04_optimizacion_produccion/index.md
+        #   children:
+        #     - file: 01_machine_learning/mod_04_optimizacion_produccion/cap_01_hiperparametros/index.md
+        #     - file: 01_machine_learning/mod_04_optimizacion_produccion/cap_02_pipelines/index.md
+        #     - file: 01_machine_learning/mod_04_optimizacion_produccion/cap_03_despliegue_monitoreo/index.md
+
+    - file: 02_deep_learning/index.md
+      # children:
+      #   - file: 02_deep_learning/mod_01_fundamentos_redes/index.md
+      #     children:
+      #       - file: 02_deep_learning/mod_01_fundamentos_redes/cap_01_perceptron_mlp/index.md
+      #       - file: 02_deep_learning/mod_01_fundamentos_redes/cap_02_backpropagation/index.md
+      #       - file: 02_deep_learning/mod_01_fundamentos_redes/cap_03_pytorch/index.md
+      #   - file: 02_deep_learning/mod_02_vision_computador/index.md
+      #     children:
+      #       - file: 02_deep_learning/mod_02_vision_computador/cap_01_convoluciones/index.md
+      #       - file: 02_deep_learning/mod_02_vision_computador/cap_02_arquitecturas_cnn/index.md
+      #       - file: 02_deep_learning/mod_02_vision_computador/cap_03_transfer_learning/index.md
+      #   - file: 02_deep_learning/mod_03_secuencias_atencion/index.md
+      #     children:
+      #       - file: 02_deep_learning/mod_03_secuencias_atencion/cap_01_rnn_lstm/index.md
+      #       - file: 02_deep_learning/mod_03_secuencias_atencion/cap_02_atencion/index.md
+      #       - file: 02_deep_learning/mod_03_secuencias_atencion/cap_03_transformers/index.md
+      #   - file: 02_deep_learning/mod_04_entrenamiento_despliegue/index.md
+      #     children:
+      #       - file: 02_deep_learning/mod_04_entrenamiento_despliegue/cap_01_regularizacion/index.md
+      #       - file: 02_deep_learning/mod_04_entrenamiento_despliegue/cap_02_entrenamiento_gpu/index.md
+      #       - file: 02_deep_learning/mod_04_entrenamiento_despliegue/cap_03_exportacion_serving/index.md
+
+    - file: 03_ia_generativa/index.md
+      # children:
+      #   - file: 03_ia_generativa/mod_01_modelos_generativos/index.md
+      #     children:
+      #       - file: 03_ia_generativa/mod_01_modelos_generativos/cap_01_autoencoders_vae/index.md
+      #       - file: 03_ia_generativa/mod_01_modelos_generativos/cap_02_gans_difusion/index.md
+      #       - file: 03_ia_generativa/mod_01_modelos_generativos/cap_03_llm_tokenizacion/index.md
+      #   - file: 03_ia_generativa/mod_02_prompting_apis/index.md
+      #     children:
+      #       - file: 03_ia_generativa/mod_02_prompting_apis/cap_01_ingenieria_prompts/index.md
+      #       - file: 03_ia_generativa/mod_02_prompting_apis/cap_02_apis_salidas_estructuradas/index.md
+      #       - file: 03_ia_generativa/mod_02_prompting_apis/cap_03_fine_tuning/index.md
+      #   - file: 03_ia_generativa/mod_03_rag/index.md
+      #     children:
+      #       - file: 03_ia_generativa/mod_03_rag/cap_01_embeddings_vectores/index.md
+      #       - file: 03_ia_generativa/mod_03_rag/cap_02_pipeline_rag/index.md
+      #       - file: 03_ia_generativa/mod_03_rag/cap_03_evaluacion_rag/index.md
+      #   - file: 03_ia_generativa/mod_04_agentes_produccion/index.md
+      #     children:
+      #       - file: 03_ia_generativa/mod_04_agentes_produccion/cap_01_uso_herramientas/index.md
+      #       - file: 03_ia_generativa/mod_04_agentes_produccion/cap_02_agentes/index.md
+      #       - file: 03_ia_generativa/mod_04_agentes_produccion/cap_03_evaluacion_seguridad/index.md
+
+    - file: 04_documentacion/index.md
+      children:
+        - file: 04_documentacion/machine_learning/index.md
+        - file: 04_documentacion/deep_learning/index.md
+        - file: 04_documentacion/ia_generativa/index.md
+
+site:
+  template: book-theme
+  options:
+    logo_text: Ruta de Inteligencia Artificial
+    folders: true
+    style: _static/riwi.css
+  actions:
+    - title: Seguir a Riwi AI
+      url: https://github.com/RiwiAI

@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+
+:root {
+  --marca-primario:        #6b5cff;
+  --marca-primario-hover:  #5546e8;
+  --marca-primario-suave:  #efedff;
+  --marca-borde-suave:     #dcdbf0;
+  --marca-tinta:           #181e4b;
+  --marca-tinta-suave:     #5b6280;
+  --marca-fondo:           #f9fafc;
+  --marca-si:              #2e9c78;
+  --marca-no:              #d9503b;
+
+  --marca-primario-dark:       #8a7dff;
+  --marca-primario-hover-dark: #a99fff;
+  --marca-fondo-dark:          #0f1230;
+  --marca-superficie-dark:     #181e4b;
+  --marca-superficie-2-dark:   #242b62;
+  --marca-borde-dark:          #2f376e;
+  --marca-tinta-dark:          #eef0fa;
+  --marca-tinta-suave-dark:    #a9aecb;
+  --marca-si-dark:             #5acca4;
+  --marca-no-dark:             #fe7b68;
+}
+
+html:root {
+  --myst-color-bg:                    var(--marca-fondo);
+  --myst-color-bg-secondary:          #ffffff;
+  --myst-color-border:                var(--marca-borde-suave);
+  --myst-color-prose-body:            var(--marca-tinta);
+  --myst-color-primary:               var(--marca-primario);
+  --myst-color-primary-hover:         var(--marca-primario-hover);
+  --myst-color-link:                  var(--marca-primario-hover);
+  --myst-color-link-hover:            var(--marca-primario);
+  --myst-color-link-underline:        var(--marca-borde-suave);
+  --myst-color-active:                var(--marca-primario);
+  --myst-color-active-bg:             color-mix(in srgb, var(--marca-primario) 12%, transparent);
+  --myst-color-active-surface:        var(--marca-primario-suave);
+  --myst-color-accent-text:           var(--marca-tinta);
+  --myst-color-accent-surface:        var(--marca-primario-suave);
+  --myst-color-accent-surface-border: var(--marca-borde-suave);
+  --myst-color-accent-surface-text:   var(--marca-tinta);
+  --myst-color-focus-ring:            var(--marca-primario);
+  --myst-color-focus-outline:         var(--marca-borde-suave);
+  --myst-color-info:                  var(--marca-primario);
+  --myst-color-info-text:             var(--marca-primario);
+  --myst-color-info-bg:               var(--marca-primario-suave);
+  --myst-color-success:               var(--marca-si);
+  --myst-color-success-text:          var(--marca-si);
+  --myst-color-danger:                var(--marca-no);
+  --myst-color-danger-text:           var(--marca-no);
+}
+
+html.dark {
+  --myst-color-bg:                    var(--marca-fondo-dark);
+  --myst-color-bg-secondary:          var(--marca-superficie-dark);
+  --myst-color-surface:               var(--marca-superficie-dark);
+  --myst-color-surface-hover:         var(--marca-superficie-2-dark);
+  --myst-color-active-surface:        var(--marca-superficie-2-dark);
+  --myst-color-border:                var(--marca-borde-dark);
+  --myst-color-prose-body:            var(--marca-tinta-dark);
+  --myst-color-primary:               var(--marca-primario-dark);
+  --myst-color-primary-hover:         var(--marca-primario-hover-dark);
+  --myst-color-link:                  var(--marca-primario-dark);
+  --myst-color-link-hover:            var(--marca-primario-hover-dark);
+  --myst-color-link-underline:        var(--marca-primario-dark);
+  --myst-color-active:                var(--marca-primario-dark);
+  --myst-color-active-bg:             color-mix(in srgb, var(--marca-primario-dark) 20%, transparent);
+  --myst-color-accent-text:           var(--marca-tinta-dark);
+  --myst-color-accent-surface:        var(--marca-superficie-2-dark);
+  --myst-color-accent-surface-border: var(--marca-borde-dark);
+  --myst-color-accent-surface-text:   var(--marca-tinta-dark);
+  --myst-color-focus-ring:            var(--marca-primario-dark);
+  --myst-color-focus-outline:         var(--marca-primario-dark);
+  --myst-color-info:                  var(--marca-primario-dark);
+  --myst-color-info-text:             var(--marca-primario-hover-dark);
+  --myst-color-info-bg:               var(--marca-superficie-dark);
+  --myst-color-success:               var(--marca-si-dark);
+  --myst-color-success-text:          var(--marca-si-dark);
+  --myst-color-danger:                var(--marca-no-dark);
+  --myst-color-danger-text:           var(--marca-no-dark);
+}
+
+html, body, .article, .myst-primary-sidebar, .myst-top-nav {
+  font-family: 'Ubuntu', ui-sans-serif, system-ui, sans-serif;
+}
+
+.myst-top-nav {
+  border-bottom: 3px solid var(--myst-color-primary);
+}
+
+.organizacion {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--myst-color-border);
+  border-left: 4px solid var(--myst-color-primary);
+  border-radius: 8px;
+  background: var(--myst-color-bg-secondary);
+}
+.organizacion img {
+  flex-shrink: 0;
+  border-radius: 12px;
+  margin: 0 !important;
+}
+.organizacion p { margin: 0 0 0.75rem; }
+@media (max-width: 480px) {
+  .organizacion { flex-direction: column; align-items: flex-start; }
+}
+
+.interactivo .relative.inline-block {
+  width: 100% !important;
+  padding-bottom: 0 !important;
+  height: 70vh;
+  min-height: 420px;
+}
+.interactivo-bajo .relative.inline-block { height: 50vh; min-height: 320px; }
+.interactivo-alto .relative.inline-block { height: 90vh; }
+.interactivo iframe {
+  border: 1px solid var(--myst-color-border) !important;
+  border-radius: 8px;
+}
+
+.botones-clase p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.botones-clase a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--myst-color-primary);
+  border-radius: 6px;
+  color: var(--myst-color-primary) !important;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none !important;
+}
+.botones-clase a:hover { background: var(--myst-color-active-bg); }
+.botones-clase a:first-child {
+  background: var(--myst-color-primary);
+  color: #ffffff !important;
+}
+.botones-clase a:first-child:hover { background: var(--myst-color-primary-hover); }
+html.dark .botones-clase a:first-child { color: var(--marca-fondo-dark) !important; }
+.botones-clase a svg { width: 1em; height: 1em; }
+
+.myst-fm-author-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+.myst-fm-author-name::after {
+  content: "";
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  -webkit-mask: var(--icono-github) center / contain no-repeat;
+          mask: var(--icono-github) center / contain no-repeat;
+}
+:root {
+  --icono-github: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'/%3E%3C/svg%3E");
+}
+.myst-fm-author-popover-link[href*="github.com/"] { font-size: 0; }
+.myst-fm-author-popover-link[href*="github.com/bryansycruz"]::after {
+  content: "@bryansycruz";
+  font-size: 0.875rem;
+}
+.myst-fm-popover-definition:has(.myst-fm-author-popover-link[href*="github.com/"]) dt { font-size: 0; }
+.myst-fm-popover-definition:has(.myst-fm-author-popover-link[href*="github.com/"]) dt::after {
+  content: "GitHub";
+  font-size: 0.875rem;
+}

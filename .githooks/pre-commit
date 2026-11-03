@@ -1,0 +1,43 @@
+#!/bin/sh
+
+archivos=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$archivos" ] && exit 0
+error=0
+
+prohibidos='(^|/)(\.env(\..+)?|[^/]*\.(pem|key|p12|pfx)|id_rsa[^/]*|id_ed25519[^/]*|\.netrc|kaggle\.json|credentials[^/]*\.json|client_secret[^/]*\.json|service_account[^/]*\.json)$'
+malos=$(printf '%s\n' "$archivos" | grep -E "$prohibidos" | grep -vE '(^|/)\.env\.example$')
+if [ -n "$malos" ]; then
+  echo "✖ Archivos de credenciales en el commit:"
+  printf '%s\n' "$malos" | sed 's/^/   /'
+  error=1
+fi
+
+claves='AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|hf_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+asignacion='(api[_-]?key|secret|password|passwd|contrase.{1,2}a|token)[a-z_]*\\?["'\'']?[[:space:]]*[:=][[:space:]]*\\?["'\''][^"'\''[:space:]\\]{8,}'
+correo='[A-Za-z0-9._%+-]+@(gmail|hotmail|outlook|yahoo|icloud|live)\.[a-z.]+'
+nuevas=$(git diff --cached -U0 --diff-filter=ACMR -- . ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' ':!*.webp' \
+  | grep -E '^\+' | grep -vE '^\+\+\+')
+lineas=$(printf '%s\n' "$nuevas" | grep -E "$claves"; printf '%s\n' "$nuevas" | grep -iE "$asignacion|$correo")
+if [ -n "$lineas" ]; then
+  echo "✖ Posibles claves, contraseñas o correos personales:"
+  printf '%s\n' "$lineas" | cut -c1-160 | sed 's/^/   /'
+  error=1
+fi
+
+pesados=$(printf '%s\n' "$archivos" | while IFS= read -r f; do
+  t=$(git cat-file -s ":$f" 2>/dev/null || echo 0)
+  [ "$t" -gt 10485760 ] && echo "   $f ($((t / 1048576)) MB)"
+done)
+if [ -n "$pesados" ]; then
+  echo "✖ Archivos de más de 10 MB (súbelos a Drive y enlázalos):"
+  printf '%s\n' "$pesados"
+  error=1
+fi
+
+if [ "$error" -ne 0 ]; then
+  echo
+  echo "Commit cancelado. Quita esos cambios (git restore --staged <archivo>),"
+  echo "mueve las claves a .env o a los Secrets de Colab, y vuelve a intentarlo."
+  exit 1
+fi
+exit 0
